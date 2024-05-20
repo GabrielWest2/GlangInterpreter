@@ -1,0 +1,84 @@
+class List {
+    constructor() {
+        this.arr = _createArrayList();
+    }
+
+    get(index){
+        return _getArrayListItem(this.arr, index);
+    }
+
+    add(item){
+        _addArrayListItem(this.arr, item);
+        return this;
+    }
+
+    set(index, item){
+        return _setArrayListItem(this.arr, index, item);
+    }
+
+    length(){
+        return _getArrayListLength(this.arr);
+    }
+
+    toString(){
+        var s = "[";
+        var len = this.length();
+        for(var v = 0; v < len; v += 1){
+            s += this.get(v);
+            if(v < len - 1){
+                s += ", ";
+            }
+        }
+        s += "]";
+        return s;
+    }
+}
+
+class Dict {
+    constructor() {
+        this.map = _createHashMap();
+    }
+
+    put(k, v) {
+        _putHashMap(this.map, k, v);
+        return this;
+    }
+
+    get(k) {
+        return _getHashMap(this.map, k);
+    }
+
+    containsKey(k){
+        return _containsHashMapKey(this.map, k);
+    }
+
+    containsValue(v){
+        return _containsHashMapValue(this.map, v);
+    }
+
+    remove(k){
+        return _removeHashMapValue(this.map, k);
+    }
+}
+
+class Math {
+    
+}
+
+var fruits = List().add("apple").add("banana").add("corn");
+var vegetables = List().add("lettuce").add("artichoke").add("beans");
+
+
+var dict = Dict().put("fruits", fruits).put("vegetables", vegetables);
+
+
+print dict.get("vegetables").toString();
+var vg = dict.remove("vegetables");
+
+if(dict.get("vegetables") != null)
+    print dict.get("vegetables").toString();
+else
+    print "null";
+
+print(vg.toString());
+
