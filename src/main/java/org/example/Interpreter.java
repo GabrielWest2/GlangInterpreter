@@ -406,6 +406,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             case BANG -> {
                 return !isTruthy(value);
             }
+
         }
 
         return null;

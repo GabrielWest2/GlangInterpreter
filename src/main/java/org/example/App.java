@@ -1,6 +1,7 @@
 package org.example;
 
 import org.apache.commons.lang3.StringUtils;
+import org.example.tools.ASTGrapher;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,14 +23,17 @@ public class App
         Tokenizer tokenizer = new Tokenizer(program);
         i = new Interpreter();
         Parser p = new Parser(tokenizer.tokenize());
-        List<Stmt> statements = p.parse();
-        Resolver r = new Resolver(i);
+        //List<Stmt> statements = p.parse();
+
+        new ASTGrapher().makeGraph(p.statement()).showGraph();
+
+       /* Resolver r = new Resolver(i);
         r.resolve(statements);
         try {
             i.interpret(statements);
         }catch (StackOverflowError e){
             System.err.println("Runtime Error: Stack Overflow");
-        }
+        }*/
     }
 
     private static String getProgramLine(int linenum){

@@ -20,7 +20,7 @@ public abstract class Expr {
  R visitSuperExpr(Super expr);
  }
  public static class Assign extends Expr {
- Assign(Token name, Expr value) {
+ public Assign(Token name, Expr value) {
  this.name = name;
  this.value = value;
  }
@@ -34,7 +34,7 @@ public final Expr value;
  }
  }
  public static class AdditionAssign extends Expr {
- AdditionAssign(Token name, Expr value) {
+ public AdditionAssign(Token name, Expr value) {
  this.name = name;
  this.value = value;
  }
@@ -48,7 +48,7 @@ public final Expr value;
  }
  }
  public static class Binary extends Expr {
- Binary(Expr left, Token operator, Expr right) {
+ public Binary(Expr left, Token operator, Expr right) {
  this.left = left;
  this.operator = operator;
  this.right = right;
@@ -110,7 +110,7 @@ public final Expr value;
  }
  }
  public static class Call extends Expr {
- Call(Expr callee, Token paren, List<Expr> arguments) {
+ public Call(Expr callee, Token paren, List<Expr> arguments) {
  this.callee = callee;
  this.paren = paren;
  this.arguments = arguments;
@@ -126,7 +126,7 @@ public final List<Expr> arguments;
  }
  }
  public static class Grouping extends Expr {
- Grouping(Expr expression) {
+ public Grouping(Expr expression) {
  this.expression = expression;
  }
 
@@ -138,7 +138,7 @@ public final Expr expression;
  }
  }
  public static class Literal extends Expr {
- Literal(Object value) {
+ public Literal(Object value) {
  this.value = value;
  }
 
@@ -150,7 +150,7 @@ public final Object value;
  }
  }
  public static class Logical extends Expr {
- Logical(Expr left, Token operator, Expr right) {
+ public Logical(Expr left, Token operator, Expr right) {
  this.left = left;
  this.operator = operator;
  this.right = right;

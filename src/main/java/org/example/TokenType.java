@@ -18,6 +18,7 @@ public enum TokenType {
 
     PLUS_EQUALS("^[+][=]"),
 
+
     PLUS("^[+]"),
     SEMICOLON("^[;]"),
     SLASH("^[/]"),

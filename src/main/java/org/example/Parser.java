@@ -47,7 +47,7 @@ public class Parser {
         return new Stmt.Var(var, init);
     }
 
-    private Stmt statement(){
+    public Stmt statement(){
 
         if(match(TokenType.CLASS)){
             return classStatement();
@@ -219,7 +219,7 @@ public class Parser {
 
 
     // Expression Rules
-    private Expr expression(){
+    Expr expression(){
         return assignment();
     }
 
