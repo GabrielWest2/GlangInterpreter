@@ -242,7 +242,7 @@ public class Parser {
      }
 
     private Expr assignment_add() {
-        Expr expr = or();
+        Expr expr = ternary();
         if (match(TokenType.PLUS_EQUALS)) {
             Token equals = prev();
             Expr value = assignment_add();
@@ -253,10 +253,22 @@ public class Parser {
                 Expr.Get get = ((Expr.Get)expr);
                 return new Expr.AdditionSet(get.object, get.name, value);
             }
-            App.parseError(equals, "Invalid assignment target.");
+            App.parseError(equals, "Invalid assignment target");
         }
 
         return expr;
+    }
+
+    private Expr ternary(){
+        Expr cond = or();
+        if (match(TokenType.QUESTION)) {
+            Token symbol = prev();
+            Expr exp1 = expression();
+            Token seperator = consume(TokenType.COLON, "Expect colon separating expressions");
+            Expr exp2 = expression();
+            return new Expr.Ternary(symbol, cond, exp1, exp2);
+        }
+        return cond;
     }
 
     private Expr or(){
@@ -311,7 +323,7 @@ public class Parser {
 
     private Expr factor(){
         Expr expr = unary();
-        while (match(TokenType.SLASH, TokenType.STAR)) {
+        while (match(TokenType.SLASH, TokenType.STAR, TokenType.PERCENT)) {
             Token operator = prev();
             Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);

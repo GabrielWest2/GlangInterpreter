@@ -15,6 +15,7 @@ public abstract class Expr {
  R visitLiteralExpr(Literal expr);
  R visitLogicalExpr(Logical expr);
  R visitUnaryExpr(Unary expr);
+ R visitTernaryExpr(Ternary expr);
  R visitPostfixExpr(Postfix expr);
  R visitThisExpr(This expr);
  R visitVariableExpr(Variable expr);
@@ -178,6 +179,24 @@ public final Expr right;
  @Override
  public <R> R accept(Visitor<R> visitor) {
  return visitor.visitUnaryExpr(this);
+ }
+ }
+ public static class Ternary extends Expr {
+ Ternary(Token operator, Expr cond, Expr exp1, Expr exp2) {
+ this.operator = operator;
+ this.cond = cond;
+ this.exp1 = exp1;
+ this.exp2 = exp2;
+ }
+
+public final Token operator;
+public final Expr cond;
+public final Expr exp1;
+public final Expr exp2;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitTernaryExpr(this);
  }
  }
  public static class Postfix extends Expr {

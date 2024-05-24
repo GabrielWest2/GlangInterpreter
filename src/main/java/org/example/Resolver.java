@@ -171,6 +171,14 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitTernaryExpr(Expr.Ternary expr) {
+        resolve(expr.cond);
+        resolve(expr.exp1);
+        resolve(expr.exp2);
+        return null;
+    }
+
+    @Override
     public Void visitPostfixExpr(Expr.Postfix expr) {
         resolve(expr.left);
         return null;

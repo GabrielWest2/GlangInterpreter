@@ -21,6 +21,7 @@ public class ASTGenerator {
                 "Literal : Object value",
                 "Logical : Expr left, Token operator, Expr right",
                 "Unary : Token operator, Expr right",
+                "Ternary : Token operator, Expr cond, Expr exp1, Expr exp2",
                 "Postfix : Token operator, Expr left",
                 "This : Token keyword",
                 "Variable : Token name",

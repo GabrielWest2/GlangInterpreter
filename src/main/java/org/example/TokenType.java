@@ -6,7 +6,6 @@ package org.example;
  */
 public enum TokenType {
     EMPTY("^\\s+", "^\\/\\/.*", "^/\\*[\\s\\S]*?\\*\\/"),
-    //PLUS_PLUS("^[+][+]"),
     // Single-character tokens.
     LEFT_PAREN("^[\\(]"),
     RIGHT_PAREN("^[\\)]"),
@@ -14,17 +13,22 @@ public enum TokenType {
     RIGHT_BRACE("^[\\}]"),
     COMMA("^[,]"),
     DOT("^[.]"),
+    QUESTION("^[\\?]"),
 
     PLUS_EQUALS("^[+][=]"),
     PLUS_PLUS("^[+][+]"),
     MINUS_MINUS("^[-][-]"),
 
+    // Binary Operators
     MINUS("^[\\-]"),
     PLUS("^[+]"),
     SEMICOLON("^[;]"),
+    COLON("^[:]"),
     SLASH("^[/]"),
     STAR("^[*]"),
-    // One or two character tokens.
+    PERCENT("^[%]"),
+
+    // Logical operators
     BANG_EQUAL("^!="),
     BANG("^!"),
     EQUAL_EQUAL("^=="),

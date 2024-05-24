@@ -267,6 +267,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left / (double)right;
+            case PERCENT:
+                checkNumberOperands(expr.operator, left, right);
+                return (double)left % (double)right;
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
                 return (double)left * (double)right;
@@ -274,6 +277,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
                 // Add numbers
                 if (left instanceof Double && right instanceof Double) {
                     return (double)left + (double)right;
+                }
+                if (left instanceof Double && right instanceof String) {
+                    return stringify(left) + right;
                 }
                 // Concat strings
                 if (left instanceof String && right instanceof String) {
@@ -429,6 +435,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         }
 
         return null;
+    }
+
+    @Override
+    public Object visitTernaryExpr(Expr.Ternary expr) {
+        Object eval = evaluate(expr.cond);
+        if(isTruthy(eval)){
+            return evaluate(expr.exp1);
+        }else{
+            return evaluate(expr.exp2);
+        }
     }
 
     @Override
