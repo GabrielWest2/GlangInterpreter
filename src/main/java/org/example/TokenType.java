@@ -14,10 +14,12 @@ public enum TokenType {
     RIGHT_BRACE("^[\\}]"),
     COMMA("^[,]"),
     DOT("^[.]"),
-    MINUS("^[\\-]"),
 
     PLUS_EQUALS("^[+][=]"),
+    PLUS_PLUS("^[+][+]"),
+    MINUS_MINUS("^[-][-]"),
 
+    MINUS("^[\\-]"),
     PLUS("^[+]"),
     SEMICOLON("^[;]"),
     SLASH("^[/]"),

@@ -82,6 +82,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
                 return ((ArrayList<Object>)arguments.get(0)).add(arguments.get(1));
             }
         });
+        globals.define("_addArrayListItemAt", new GCallable() {
+            @Override
+            public int arity() {
+                return 3;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                ((ArrayList<Object>)arguments.get(0)).add((int)((Double)arguments.get(1)).doubleValue(), arguments.get(2));
+                return null ;
+            }
+        });
         globals.define("_setArrayListItem", new GCallable() {
             @Override
             public int arity() {
@@ -214,6 +226,18 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         Integer distance = locals.get(expr);
 
         Object oldValue = environment.get(expr.name);
+        Object newValue = plusEq(value, oldValue, expr.name, expr);
+
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, newValue);
+        } else {
+            globals.assign(expr.name, newValue);
+        }
+
+        return newValue;
+    }
+
+    private Object plusEq(Object value, Object oldValue, Token name, Expr expr) {
         Object newValue = null;
 
         if((oldValue instanceof Double || oldValue instanceof String) && (value instanceof Double || value instanceof String)){
@@ -227,17 +251,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
                 newValue = stringify(oldValue) + stringify(value);
             }
         }else{
-            App.runtimeError(expr.name, "Cannot use '+=' on these types");
+            App.runtimeError(name, "Cannot use '+=' on these types");
         }
-
-        if (distance != null) {
-            environment.assignAt(distance, expr.name, newValue);
-        } else {
-            globals.assign(expr.name, newValue);
-        }
-
-
-        return value;
+        return newValue;
     }
 
     @Override
@@ -314,21 +330,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
         System.out.println("rb");
         Object oldValue = ((GClassInstance)obj).get(expr.name);
-        Object newValue = null;
-
-        if((oldValue instanceof Double || oldValue instanceof String) && (value instanceof Double || value instanceof String)){
-            if(oldValue instanceof Double){
-                if(value instanceof Double) {
-                    newValue = (Double) oldValue + (Double) value;
-                }else{
-                    newValue = stringify(oldValue) + value;
-                }
-            }else{
-                newValue = stringify(oldValue) + stringify(value);
-            }
-        }else{
-            App.runtimeError(expr.name, "Cannot use '+=' on these types");
-        }
+        Object newValue = plusEq(value, oldValue, expr.name, expr);
 
 
         ((GClassInstance)obj).set(expr.name, newValue);
@@ -398,17 +400,58 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
         Object value = evaluate(expr.right);
-        switch (expr.operator.getTokenType()){
+        switch (expr.operator.getTokenType()) {
             case MINUS -> {
                 checkNumberOperand(expr.operator, value);
-                return -(double)value;
+                return -(double) value;
             }
             case BANG -> {
                 return !isTruthy(value);
             }
+            case PLUS_PLUS, MINUS_MINUS -> {
+                if(!(expr.right instanceof Expr.Variable)){
+                    App.runtimeError(expr.operator, "Expected name of variable");
+                }
+                Expr.Variable varexpr = (Expr.Variable) expr.right;
+                Object var = lookUpVariable(varexpr.name, varexpr);
+                checkNumberOperand(expr.operator, value);
+
+                value = ((double)value) + (expr.operator.getTokenType() == TokenType.PLUS_PLUS ? 1 : -1);
+
+                Integer distance = locals.get(varexpr);
+                if (distance != null) {
+                    environment.assignAt(distance, varexpr.name, value);
+                } else {
+                    globals.assign(varexpr.name, value);
+                }
+                return value;
+            }
         }
 
         return null;
+    }
+
+    @Override
+    public Object visitPostfixExpr(Expr.Postfix expr) {
+        Object value = evaluate(expr.left);
+
+        if(!(expr.left instanceof Expr.Variable)){
+            App.runtimeError(expr.operator, "Expected name of variable");
+            return null;
+        }
+        Expr.Variable varexpr = (Expr.Variable) expr.left;
+        Object var = lookUpVariable(varexpr.name, varexpr);
+        checkNumberOperand(expr.operator, value);
+
+        Object newvalue = ((double)value) + (expr.operator.getTokenType() == TokenType.PLUS_PLUS ? 1 : -1);
+
+        Integer distance = locals.get(varexpr);
+        if (distance != null) {
+            environment.assignAt(distance, varexpr.name, newvalue);
+        } else {
+            globals.assign(varexpr.name, newvalue);
+        }
+        return value;
     }
 
     @Override

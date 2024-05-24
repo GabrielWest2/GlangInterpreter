@@ -320,7 +320,7 @@ public class Parser {
     }
 
     private Expr unary(){
-        if(match(TokenType.BANG, TokenType.MINUS)){
+        if(match(TokenType.BANG, TokenType.MINUS, TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)){
             Token operator = prev();
             Expr right = unary();
             return new Expr.Unary(operator, right);
@@ -328,8 +328,9 @@ public class Parser {
         return call();
     }
 
+
     private Expr call(){
-        Expr expr = primary();
+        Expr expr = postfix();
 
         while (true){
             if(match(TokenType.LEFT_PAREN)){
@@ -359,6 +360,15 @@ public class Parser {
         Token paren = consume(TokenType.RIGHT_PAREN, "Expect ) after arguments");
 
         return new Expr.Call(expr, paren, arguments);
+    }
+
+    private Expr postfix(){
+        Expr expr = primary();
+        if(match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)){
+            Token operator = prev();
+            return new Expr.Postfix(operator, expr);
+        }
+        return expr;
     }
 
     private Expr primary(){

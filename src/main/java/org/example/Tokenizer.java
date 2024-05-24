@@ -77,7 +77,7 @@ public class Tokenizer {
             }
         }
 
-        tokens.add(new Token(TokenType.EOF, "", null, -1, 0));
+        tokens.add(new Token(TokenType.EOF, "", null, linenum, charnum));
         return tokens;
     }
 }

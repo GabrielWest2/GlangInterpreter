@@ -171,6 +171,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitPostfixExpr(Expr.Postfix expr) {
+        resolve(expr.left);
+        return null;
+    }
+
+    @Override
     public Void visitThisExpr(Expr.This expr) {
         if(classType == ClassType.NONE){
             App.resolveError(expr.keyword, "Cannot use 'this' here");
