@@ -395,12 +395,29 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitLogicalExpr(Expr.Logical expr) {
         Object left = evaluate(expr.left);
-        if (expr.operator.getTokenType() == TokenType.OR) {
-            if (isTruthy(left)) return left;
-        } else {
-            if (!isTruthy(left)) return left;
+        switch (expr.operator.getTokenType()){
+            case OR -> {
+                if (isTruthy(left)) return left;
+                return evaluate(expr.right);
+            }
+            case XOR -> {
+                boolean l = isTruthy(left);
+                boolean r = isTruthy(evaluate(expr.right));
+                if((l || r) && (!(l && r))) return true;
+                return false;
+            }
+            case AND -> {
+                if (!isTruthy(left)) return left;
+                return evaluate(expr.right);
+            }
         }
-        return evaluate(expr.right);
+        if (expr.operator.getTokenType() == TokenType.OR) {
+
+        } else {
+
+        }
+
+        return null;
     }
 
     @Override

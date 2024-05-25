@@ -49,6 +49,7 @@ public enum TokenType {
     IF("^if(?![_a-zA-Z0-9])"),
     NULL("^null(?![_a-zA-Z0-9])"),
     OR("^or(?![_a-zA-Z0-9])"),
+    XOR("^xor(?![_a-zA-Z0-9])"),
     PRINT("^print(?![_a-zA-Z0-9])"),
     RETURN("^return(?=[\\s;])"),
     SUPER("^super(?![_a-zA-Z0-9])"),

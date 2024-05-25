@@ -272,14 +272,24 @@ public class Parser {
     }
 
     private Expr or(){
-         Expr expr = and();
+         Expr expr = xor();
          while (match(TokenType.OR)) {
              Token operator = prev();
-             Expr right = and();
+             Expr right = xor();
              expr = new Expr.Logical(expr, operator, right);
          }
          return expr;
      }
+
+    private Expr xor(){
+        Expr expr = and();
+        while (match(TokenType.XOR)) {
+            Token operator = prev();
+            Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+        return expr;
+    }
 
     private Expr and(){
         Expr expr = equality();

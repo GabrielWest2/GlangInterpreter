@@ -1,3 +1,6 @@
 for(var v = 10; v >= 0; v--){
     print v + " " + ( v % 2 == 0 ? "is even" : "is odd");
+    if(false xor true){
+        print("yay");
+    }
 }
