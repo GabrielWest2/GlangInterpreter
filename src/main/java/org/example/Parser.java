@@ -218,6 +218,8 @@ public class Parser {
     }
 
 
+
+
     // Expression Rules
     private Expr expression(){
         return assignment();
@@ -234,6 +236,12 @@ public class Parser {
             } else if(expr instanceof Expr.Get){
                 Expr.Get get = ((Expr.Get)expr);
                 return new Expr.Set(get.object, get.name, value);
+            } else if(expr instanceof Expr.Postfix){
+                Expr.Postfix postfix = ((Expr.Postfix)expr);
+                if(postfix.operator.getTokenType() == TokenType.LEFT_BRACKET){
+                    System.out.println( "assign arr index");
+                    return new Expr.ArrayAssign(postfix, equals, value);
+                }
             }
             App.parseError(equals, "Invalid assignment target.");
         }
@@ -350,7 +358,6 @@ public class Parser {
         return call();
     }
 
-
     private Expr call(){
         Expr expr = postfix();
 
@@ -367,28 +374,17 @@ public class Parser {
         return expr;
     }
 
-    private Expr finishCall(Expr expr) {
-        List<Expr> arguments = new ArrayList<>();
-
-        if(!check(TokenType.RIGHT_PAREN)){
-            do {
-                arguments.add(expression());
-                if(arguments.size() > 255){
-                    App.parseError(prev(), "Method cannot have more than 255 arguments.");
-                }
-            } while (match(TokenType.COMMA));
-        }
-
-        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ) after arguments");
-
-        return new Expr.Call(expr, paren, arguments);
-    }
-
     private Expr postfix(){
         Expr expr = primary();
         if(match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)){
             Token operator = prev();
-            return new Expr.Postfix(operator, expr);
+            return new Expr.Postfix(operator, expr, null);
+        }else if(match(TokenType.LEFT_BRACKET)){
+            System.out.println("array access");
+            Token operator = prev();
+            Expr value = expression();
+            consume(TokenType.RIGHT_BRACKET, "Expect closing ] here");
+            return new Expr.Postfix(operator, expr, value);
         }
         return expr;
     }
@@ -418,6 +414,14 @@ public class Parser {
             return new Expr.Grouping(expr);
         }
 
+        if(match(TokenType.LEFT_BRACKET)){
+            ArrayList<Expr> exprs = new ArrayList<>();
+            while(!match(TokenType.RIGHT_BRACKET)){
+                exprs.add(expression());
+                match(TokenType.COMMA);
+            }
+            return new Expr.ArrayInit(exprs);
+        }
         App.parseError(curr(), "Unexpected token.");
         return null;
     }
@@ -425,6 +429,26 @@ public class Parser {
 
 
 
+
+
+
+
+    private Expr finishCall(Expr expr) {
+        List<Expr> arguments = new ArrayList<>();
+
+        if(!check(TokenType.RIGHT_PAREN)){
+            do {
+                arguments.add(expression());
+                if(arguments.size() > 255){
+                    App.parseError(prev(), "Method cannot have more than 255 arguments.");
+                }
+            } while (match(TokenType.COMMA));
+        }
+
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ) after arguments");
+
+        return new Expr.Call(expr, paren, arguments);
+    }
 
     private void synchronize() {
         advance();
@@ -463,6 +487,7 @@ public class Parser {
         App.parseError(curr(), err);
         return null;
     }
+
 
     private Token advance() {
         if (!isAtEnd()) current++;

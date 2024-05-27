@@ -10,7 +10,9 @@ public enum TokenType {
     LEFT_PAREN("^[\\(]"),
     RIGHT_PAREN("^[\\)]"),
     LEFT_BRACE("^[\\{]"),
+    LEFT_BRACKET("^[\\[]"),
     RIGHT_BRACE("^[\\}]"),
+    RIGHT_BRACKET("^[\\]]"),
     COMMA("^[,]"),
     DOT("^[.]"),
     QUESTION("^[\\?]"),
@@ -34,8 +36,8 @@ public enum TokenType {
     EQUAL_EQUAL("^=="),
     EQUAL("^="),
     GREATER_EQUAL("^>="),
-    GREATER("^>"),
     LESS_EQUAL("^<="),
+    GREATER("^>"),
     LESS("^<"),
 
     // Keywords.

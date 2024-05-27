@@ -6,6 +6,7 @@ public abstract class Expr {
  public interface Visitor<R> {
  R visitAssignExpr(Assign expr);
  R visitAdditionAssignExpr(AdditionAssign expr);
+ R visitArrayAssignExpr(ArrayAssign expr);
  R visitBinaryExpr(Binary expr);
  R visitGetExpr(Get expr);
  R visitSetExpr(Set expr);
@@ -13,6 +14,7 @@ public abstract class Expr {
  R visitCallExpr(Call expr);
  R visitGroupingExpr(Grouping expr);
  R visitLiteralExpr(Literal expr);
+ R visitArrayInitExpr(ArrayInit expr);
  R visitLogicalExpr(Logical expr);
  R visitUnaryExpr(Unary expr);
  R visitTernaryExpr(Ternary expr);
@@ -47,6 +49,22 @@ public final Expr value;
  @Override
  public <R> R accept(Visitor<R> visitor) {
  return visitor.visitAdditionAssignExpr(this);
+ }
+ }
+ public static class ArrayAssign extends Expr {
+ ArrayAssign(Expr postfix, Token eq, Expr value) {
+ this.postfix = postfix;
+ this.eq = eq;
+ this.value = value;
+ }
+
+public final Expr postfix;
+public final Token eq;
+public final Expr value;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitArrayAssignExpr(this);
  }
  }
  public static class Binary extends Expr {
@@ -151,6 +169,18 @@ public final Object value;
  return visitor.visitLiteralExpr(this);
  }
  }
+ public static class ArrayInit extends Expr {
+ ArrayInit(List<Expr> exprs) {
+ this.exprs = exprs;
+ }
+
+public final List<Expr> exprs;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitArrayInitExpr(this);
+ }
+ }
  public static class Logical extends Expr {
  Logical(Expr left, Token operator, Expr right) {
  this.left = left;
@@ -200,13 +230,15 @@ public final Expr exp2;
  }
  }
  public static class Postfix extends Expr {
- Postfix(Token operator, Expr left) {
+ Postfix(Token operator, Expr left, Expr val) {
  this.operator = operator;
  this.left = left;
+ this.val = val;
  }
 
 public final Token operator;
 public final Expr left;
+public final Expr val;
 
  @Override
  public <R> R accept(Visitor<R> visitor) {

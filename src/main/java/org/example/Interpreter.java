@@ -184,6 +184,26 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             }
         });
 
+        globals.define("len", new GCallable() {
+            @Override
+            public int arity() {
+                return 1;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                Object arg1 = arguments.get(0);
+                if(arg1 instanceof String){
+                    return (double)((String)arg1).length();
+                }
+                if(arg1.getClass().isArray()){
+                    return (double)((Object[])arg1).length;
+                }
+                System.out.println("BAD BAD");
+                return null;
+            }
+        });
+
     }
 
     void interpret(List<Stmt> statements) {
@@ -198,6 +218,17 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
     private String stringify(Object object) {
         if (object == null) return "null";
+        if(object.getClass().isArray()){
+            Object[] arrayValues = (Object[])object;
+            String s = "[";
+            int i = 0;
+            for(Object val : arrayValues){
+                s += stringify(val);
+                if(i < arrayValues.length-1) s += ", ";
+                i++;
+            }
+            return s + "]";
+        }
         if (object instanceof Double) {
             String text = object.toString();
             if (text.endsWith(".0")) {
@@ -211,6 +242,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.value);
+
         Integer distance = locals.get(expr);
         if (distance != null) {
             environment.assignAt(distance, expr.name, value);
@@ -235,6 +267,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         }
 
         return newValue;
+    }
+
+    @Override
+    public Object visitArrayAssignExpr(Expr.ArrayAssign expr) {
+        Object value = evaluate(expr.value);
+        System.out.println("array assign to " + value);
+
+        Expr.Postfix post = (Expr.Postfix)expr.postfix;
+
+        Object index = evaluate(post.val);
+        if(!(index instanceof Double)) App.runtimeError(post.operator, "Expected numeric index");
+        Double ind = (Double) index;
+        if(ind % 1 != 0) App.runtimeError(post.operator, "Expected integer index");
+        int i = (int) (double)ind;
+
+        Object[] arr = (Object[]) evaluate(post.left);
+        arr[i] = value;
+        return arr;
     }
 
     private Object plusEq(Object value, Object oldValue, Token name, Expr expr) {
@@ -393,6 +443,20 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     }
 
     @Override
+    public Object visitArrayInitExpr(Expr.ArrayInit expr) {
+        List<Object> values = new ArrayList<>();
+        for(Expr e : expr.exprs){
+            values.add(evaluate(e));
+        }
+        Object[] obj = new Object[values.size()];
+        for(int i = 0; i < values.size(); i++){
+            obj[i] = values.get(i);
+        }
+
+        return obj;
+    }
+
+    @Override
     public Object visitLogicalExpr(Expr.Logical expr) {
         Object left = evaluate(expr.left);
         switch (expr.operator.getTokenType()){
@@ -467,24 +531,35 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitPostfixExpr(Expr.Postfix expr) {
         Object value = evaluate(expr.left);
+        if(expr.operator.getTokenType() != TokenType.LEFT_BRACKET) {
+            if (!(expr.left instanceof Expr.Variable)) {
+                App.runtimeError(expr.operator, "Expected name of variable");
+                return null;
+            }
+            Expr.Variable varexpr = (Expr.Variable) expr.left;
+            Object var = lookUpVariable(varexpr.name, varexpr);
+            checkNumberOperand(expr.operator, value);
 
-        if(!(expr.left instanceof Expr.Variable)){
-            App.runtimeError(expr.operator, "Expected name of variable");
-            return null;
+            Object newvalue = ((double) value) + (expr.operator.getTokenType() == TokenType.PLUS_PLUS ? 1 : -1);
+
+            Integer distance = locals.get(varexpr);
+            if (distance != null) {
+                environment.assignAt(distance, varexpr.name, newvalue);
+            } else {
+                globals.assign(varexpr.name, newvalue);
+            }
+            return value;
         }
-        Expr.Variable varexpr = (Expr.Variable) expr.left;
-        Object var = lookUpVariable(varexpr.name, varexpr);
-        checkNumberOperand(expr.operator, value);
 
-        Object newvalue = ((double)value) + (expr.operator.getTokenType() == TokenType.PLUS_PLUS ? 1 : -1);
+        if(!value.getClass().isArray()) App.runtimeError(expr.operator, "Cannot use array access operator on this object");
 
-        Integer distance = locals.get(varexpr);
-        if (distance != null) {
-            environment.assignAt(distance, varexpr.name, newvalue);
-        } else {
-            globals.assign(varexpr.name, newvalue);
-        }
-        return value;
+        Object index = evaluate(expr.val);
+        if(!(index instanceof Double)) App.runtimeError(expr.operator, "Expected numeric index");
+        Double ind = (Double) index;
+        if(ind % 1 != 0) App.runtimeError(expr.operator, "Expected integer index");
+        int i = (int) (double)ind;
+
+        return ((Object[]) value)[i];
     }
 
     @Override

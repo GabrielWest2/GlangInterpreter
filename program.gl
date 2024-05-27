@@ -1,6 +1,8 @@
-for(var v = 10; v >= 0; v--){
-    print v + " " + ( v % 2 == 0 ? "is even" : "is odd");
-    if(false xor true){
-        print("yay");
-    }
+var verts = [1, 2, 3,   2, 3, 0];
+
+for(var v = 0; v < len(verts); v++){
+    verts[v] = verts[v] * 2;
+    verts[v] = verts[v] * 2;
 }
+
+print(verts);

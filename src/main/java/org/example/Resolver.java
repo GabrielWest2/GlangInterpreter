@@ -58,10 +58,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void resolve(Stmt stmt) {
+        if(stmt == null) return;
         stmt.accept(this);
     }
 
     private void resolve(Expr expr) {
+        if(expr == null) return;
         expr.accept(this);
     }
 
@@ -105,6 +107,13 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitAdditionAssignExpr(Expr.AdditionAssign expr) {
         resolve(expr.value);
         resolveLocal(expr, expr.name);
+        return null;
+    }
+
+    @Override
+    public Void visitArrayAssignExpr(Expr.ArrayAssign expr) {
+        resolve(expr.postfix);
+        resolve(expr.value);
         return null;
     }
 
@@ -158,6 +167,14 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitArrayInitExpr(Expr.ArrayInit expr) {
+        for(Expr e : expr.exprs){
+            resolve(e);
+        }
+        return null;
+    }
+
+    @Override
     public Void visitLogicalExpr(Expr.Logical expr) {
         resolve(expr.left);
         resolve(expr.right);
@@ -181,6 +198,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitPostfixExpr(Expr.Postfix expr) {
         resolve(expr.left);
+        resolve(expr.val);
         return null;
     }
 

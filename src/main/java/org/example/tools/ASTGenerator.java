@@ -12,6 +12,7 @@ public class ASTGenerator {
         defineAst("./src/main/java/org/example", "Expr", Arrays.asList(
                 "Assign : Token name, Expr value",
                 "AdditionAssign : Token name, Expr value",
+                "ArrayAssign : Expr postfix, Token eq, Expr value",
                 "Binary : Expr left, Token operator, Expr right",
                 "Get : Expr object, Token name",
                 "Set : Expr object, Token name, Expr value",
@@ -19,10 +20,11 @@ public class ASTGenerator {
                 "Call : Expr callee, Token paren, List<Expr> arguments",
                 "Grouping : Expr expression",
                 "Literal : Object value",
+                "ArrayInit : List<Expr> exprs",
                 "Logical : Expr left, Token operator, Expr right",
                 "Unary : Token operator, Expr right",
                 "Ternary : Token operator, Expr cond, Expr exp1, Expr exp2",
-                "Postfix : Token operator, Expr left",
+                "Postfix : Token operator, Expr left, Expr val",
                 "This : Token keyword",
                 "Variable : Token name",
                 "Super : Token keyword, Token method"
