@@ -1,6 +1,11 @@
 package org.example;
 
+import me.xdrop.fuzzywuzzy.FuzzySearch;
+import me.xdrop.fuzzywuzzy.model.ExtractedResult;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Environment {
     private final Environment parent;
@@ -35,6 +40,15 @@ public class Environment {
         variables.put(name, value);
     }
 
+    public List<String> getAllVariablesNames(){
+        List<String> names = new ArrayList<>();
+        names.addAll(variables.keySet());
+        if(parent != null){
+            names.addAll(parent.getAllVariablesNames());
+        }
+        return names;
+    }
+
     /**
      * Assign value to variable
      *
@@ -51,7 +65,22 @@ public class Environment {
             parent.assign(name, value);
             return;
         }
-        App.runtimeError(name, "Undefined variable " + name.getLexeme());
+
+        List<String> names = getAllVariablesNames();
+        List<ExtractedResult> results = FuzzySearch.extractAll(name.getLexeme(), names);
+        int highestId = 0;
+        int highestScore = 0;
+        for(ExtractedResult r : results){
+            if(r.getScore() > highestScore){
+                highestScore = r.getScore();
+                highestId = r.getIndex();
+            }
+        }
+        String ex = "";
+        if(highestScore > 50){
+            ex = "\n  Did you mean '"+names.get(highestId)+"'?";
+        }
+        App.runtimeError(name, "Undefined variable '" + name.getLexeme()+"'" + ex);
     }
 
     /**
@@ -79,7 +108,21 @@ public class Environment {
         } else {
             if (parent != null) return parent.get(name);
         }
-        App.runtimeError(name, "Undefined variable " + name.getLexeme());
+        List<String> names = getAllVariablesNames();
+        List<ExtractedResult> results = FuzzySearch.extractAll(name.getLexeme(), names);
+        int highestId = 0;
+        int highestScore = 0;
+        for(ExtractedResult r : results){
+            if(r.getScore() > highestScore){
+                highestScore = r.getScore();
+                highestId = r.getIndex();
+            }
+        }
+        String ex = "";
+        if(highestScore > 50){
+            ex = "\n  Did you mean '"+names.get(highestId)+"'?";
+        }
+        App.runtimeError(name, "Undefined variable '" + name.getLexeme()+"'" + ex);
         return null;
     }
 
