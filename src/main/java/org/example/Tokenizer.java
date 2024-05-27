@@ -60,6 +60,7 @@ public class Tokenizer {
                             case STRING -> {
                                 String val = match.substring(1,match.length()-1);
                                 val = val.replaceAll("\\\\\\\"", "\"");
+                                val = val.replaceAll("\\\\n", "\n");
                                 tokens.add(new Token(t, match, val, linenum, charnum));
                             }
                             default -> {

@@ -380,7 +380,6 @@ public class Parser {
             Token operator = prev();
             return new Expr.Postfix(operator, expr, null);
         }else if(match(TokenType.LEFT_BRACKET)){
-            System.out.println("array access");
             Token operator = prev();
             Expr value = expression();
             consume(TokenType.RIGHT_BRACKET, "Expect closing ] here");
