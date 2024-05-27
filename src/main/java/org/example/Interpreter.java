@@ -17,7 +17,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
                 execute(statement);
             }
         } catch (RuntimeError error) {
-            error.printStackTrace();
+            App.runtimeError(null, error.getMessage());
         }
     }
 
@@ -25,11 +25,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         if (object == null) return "null";
         if(object.getClass().isArray()){
             Object[] arrayValues = (Object[])object;
-            String s = "[";
+            StringBuilder s = new StringBuilder("[");
             int i = 0;
             for(Object val : arrayValues){
-                s += stringify(val);
-                if(i < arrayValues.length-1) s += ", ";
+                s.append(stringify(val));
+                if(i < arrayValues.length-1) s.append(", ");
                 i++;
             }
             return s + "]";
@@ -85,7 +85,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         if(ind % 1 != 0) App.runtimeError(post.operator, "Expected integer index");
         int i = (int) (double)ind;
 
-        Object[] arr = (Object[]) evaluate(post.left);
+        Object v = evaluate(post.left);
+        if(!v.getClass().isArray()) App.runtimeError(post.operator, "Cannot use array access operator on this");
+        Object[] arr = (Object[]) v;
         arr[i] = value;
         return arr;
     }
@@ -136,11 +138,11 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
                 }
                 // Concat strings
                 if (left instanceof String && right instanceof String) {
-                    return (String)left + (String)right;
+                    return left + (String)right;
                 }
 
                 if (left instanceof String && right instanceof Double) {
-                    return (String)left + stringify(right);
+                    return left + stringify(right);
                 }
                 App.runtimeError(expr.operator, "Expected numbers, or strings.");
             case GREATER:
@@ -278,11 +280,6 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
                 return evaluate(expr.right);
             }
         }
-        if (expr.operator.getTokenType() == TokenType.OR) {
-
-        } else {
-
-        }
 
         return null;
     }
@@ -354,7 +351,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             return value;
         }
 
-        if(!value.getClass().isArray()) App.runtimeError(expr.operator, "Cannot use array access operator on this object");
+        if(!value.getClass().isArray()) App.runtimeError(expr.operator, "Cannot use array access operator on this");
 
         Object index = evaluate(expr.val);
         if(!(index instanceof Double)) App.runtimeError(expr.operator, "Expected numeric index");

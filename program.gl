@@ -1,13 +1,13 @@
-var arrs = [[1, 2], [1, 2, 3, 4], [3], []];
+var arrs = [[1, 2], [1, 2, 3, 4], [3], [1, 2, 3]];
+
+arrs[3][0] = 100;
 
 for(var v = 0; v < len(arrs); v++){
     var g = arrs[v];
     for(var i = 0; i < len(g); i++){
         var h = g[i];
         print "Arr " + v + ":  " + h;
-        print rint(random() * 101);
     }
+    print "";
 }
-var cool = 12;
-var cooool = 12;
-print(coool);
+

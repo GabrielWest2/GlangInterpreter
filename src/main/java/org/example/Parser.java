@@ -380,10 +380,19 @@ public class Parser {
             Token operator = prev();
             return new Expr.Postfix(operator, expr, null);
         }else if(match(TokenType.LEFT_BRACKET)){
-            Token operator = prev();
-            Expr value = expression();
-            consume(TokenType.RIGHT_BRACKET, "Expect closing ] here");
-            return new Expr.Postfix(operator, expr, value);
+            Expr postfix = null;
+            do {
+                Token operator = prev();
+                Expr value = expression();
+                consume(TokenType.RIGHT_BRACKET, "Expect closing ] here");
+                if(postfix == null){
+                    postfix = new Expr.Postfix(operator, expr, value);
+                }else{
+                    postfix = new Expr.Postfix(operator, postfix, value);
+                }
+
+            } while(match(TokenType.LEFT_BRACKET));
+            return postfix;
         }
         return expr;
     }

@@ -40,11 +40,18 @@ public class Environment {
         variables.put(name, value);
     }
 
-    public List<String> getAllVariablesNames(){
+    /**
+     * Returns the names of all variable names in this scope and above
+     * @param includeGlobals include global scope
+     * @return {@code List<String>} of the names
+     */
+    public List<String> getAllVariablesNames(boolean includeGlobals){
         List<String> names = new ArrayList<>();
+        if(parent == null && !includeGlobals) return names;
+
         names.addAll(variables.keySet());
         if(parent != null){
-            names.addAll(parent.getAllVariablesNames());
+            names.addAll(parent.getAllVariablesNames(includeGlobals));
         }
         return names;
     }
@@ -66,21 +73,7 @@ public class Environment {
             return;
         }
 
-        List<String> names = getAllVariablesNames();
-        List<ExtractedResult> results = FuzzySearch.extractAll(name.getLexeme(), names);
-        int highestId = 0;
-        int highestScore = 0;
-        for(ExtractedResult r : results){
-            if(r.getScore() > highestScore){
-                highestScore = r.getScore();
-                highestId = r.getIndex();
-            }
-        }
-        String ex = "";
-        if(highestScore > 50){
-            ex = "\n  Did you mean '"+names.get(highestId)+"'?";
-        }
-        App.runtimeError(name, "Undefined variable '" + name.getLexeme()+"'" + ex);
+        recommendFix(name);
     }
 
     /**
@@ -108,7 +101,12 @@ public class Environment {
         } else {
             if (parent != null) return parent.get(name);
         }
-        List<String> names = getAllVariablesNames();
+        recommendFix(name);
+        return null;
+    }
+
+    private void recommendFix(Token name) {
+        List<String> names = getAllVariablesNames(false);
         List<ExtractedResult> results = FuzzySearch.extractAll(name.getLexeme(), names);
         int highestId = 0;
         int highestScore = 0;
@@ -119,13 +117,11 @@ public class Environment {
             }
         }
         String ex = "";
-        if(highestScore > 50){
-            ex = "\n  Did you mean '"+names.get(highestId)+"'?";
+        if(highestScore > 75){
+            ex = "\n  Did you mean '"+names.get(highestId)+"'?\nscore:"+highestScore;
         }
         App.runtimeError(name, "Undefined variable '" + name.getLexeme()+"'" + ex);
-        return null;
     }
-
 
 
     /**
