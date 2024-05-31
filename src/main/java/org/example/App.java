@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -13,15 +14,23 @@ import java.util.Scanner;
  */
 public class App 
 {
-    public static List<Token> tokens;
+    public static List<Token> tokens = new ArrayList<>();
     public static String program;
     public static Interpreter i;
     public static void main( String[] args ) throws FileNotFoundException {
-        program = new Scanner(new File("program.gl")).useDelimiter("\\Z").next();
+        if(args.length != 1){
+            System.err.println("Usage: glang <program>");
+            return;
+        }
 
-        Tokenizer tokenizer = new Tokenizer(program);
         i = new Interpreter();
-        Parser p = new Parser(tokenizer.tokenize());
+
+        program = new Scanner(new File("wrapper.gl")).useDelimiter("\\Z").next();;
+        tokens.addAll(StandardLibCreator.getWrapperCode(program));
+        program = new Scanner(new File(args[0])).useDelimiter("\\Z").next();
+        tokens.addAll(new Tokenizer(program).tokenize(true));
+
+        Parser p = new Parser(tokens);
         List<Stmt> statements = p.parse();
         Resolver r = new Resolver(i);
         r.resolve(statements);
@@ -33,7 +42,12 @@ public class App
     }
 
     private static String getProgramLine(int linenum){
-        return StringUtils.split(program, "\n")[linenum - 1];
+        try {
+            return StringUtils.split(program, "\n")[linenum - 1];
+
+        }finally {
+            return "Invalid line";
+        }
     }
 
     public static void runtimeError(Token t, String message){
@@ -52,10 +66,10 @@ public class App
     }
 
     private static void printErrorLine(Token t) {
-        String lineNum = String.valueOf(t.getLine());
-        System.err.println(lineNum + " | " + getProgramLine(t.getLine()));
+        String lineNum = String.valueOf(t.line());
+        System.err.println(lineNum + " | " + getProgramLine(t.line()));
         // Print out arrows pointing at the offending token
-        int numSpaces = 3 + lineNum.length() + t.getHorizontal()-t.getLexeme().length();
+        int numSpaces = 3 + lineNum.length() + t.horizontal()-t.lexeme().length();
         System.err.println(" ".repeat(Math.max(0, numSpaces)) + "^^^");
         System.exit(-1);
     }

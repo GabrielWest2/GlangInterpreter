@@ -1,13 +1,32 @@
 var arrs = [[1, 2], [1, 2, 3, 4], [3], [1, 2, 3]];
 
-arrs[3][0] = 100;
+var testlist = List().add(67).add(2).add(3).set(0, 12);
 
-for(var v = 0; v < len(arrs); v++){
-    var g = arrs[v];
-    for(var i = 0; i < len(g); i++){
-        var h = g[i];
-        print "Arr " + v + ":  " + h;
-    }
-    print "";
+
+def add(a, b) {
+    return a + b;
 }
 
+def sub(a, b) {
+    return a - b;
+}
+
+def mul(a, b) {
+    return a * b;
+}
+
+def div(a, b) {
+    return a / b;
+}
+
+var funcs = [add, sub, mul, div];
+
+foreach(var func : funcs){
+    print(func(6, 2));
+}
+
+var letters = Dict().put("a", 1).put("b", 2).put("c", 3).put("d", 4).put("e", 5);
+print letters.toString();
+foreach(var pair : letters.pairs){
+    print "pair " + pair.k + ":" + pair.v;
+}

@@ -61,11 +61,10 @@ public class Environment {
      *
      * @param name  the name of the variable
      * @param value the value to be assigned
-     * @throws RuntimeError if variable is undefined
      */
     public void assign(Token name, Object value) {
-        if (variables.containsKey(name.getLexeme())) {
-            variables.put(name.getLexeme(), value);
+        if (variables.containsKey(name.lexeme())) {
+            variables.put(name.lexeme(), value);
             return;
         }
         if (parent != null) {
@@ -82,10 +81,9 @@ public class Environment {
      * @param name     the name of the variable
      * @param value    the value to be assigned
      * @param distance how many levels up
-     * @throws RuntimeError if variable is undefined
      */
     public void assignAt(int distance, Token name, Object value) {
-        getDistParent(distance).variables.put(name.getLexeme(), value);
+        getDistParent(distance).variables.put(name.lexeme(), value);
     }
 
     /**
@@ -93,11 +91,10 @@ public class Environment {
      *
      * @param name the name of the variable
      * @return the value of the variable
-     * @throws RuntimeError if variable is undefined
      */
     public Object get(Token name) {
-        if (variables.containsKey(name.getLexeme())) {
-            return variables.get(name.getLexeme());
+        if (variables.containsKey(name.lexeme())) {
+            return variables.get(name.lexeme());
         } else {
             if (parent != null) return parent.get(name);
         }
@@ -105,9 +102,14 @@ public class Environment {
         return null;
     }
 
+
+    public boolean isDeclaredHere(String name) {
+        return variables.containsKey(name);
+    }
+
     private void recommendFix(Token name) {
         List<String> names = getAllVariablesNames(false);
-        List<ExtractedResult> results = FuzzySearch.extractAll(name.getLexeme(), names);
+        List<ExtractedResult> results = FuzzySearch.extractAll(name.lexeme(), names);
         int highestId = 0;
         int highestScore = 0;
         for(ExtractedResult r : results){
@@ -120,7 +122,7 @@ public class Environment {
         if(highestScore > 75){
             ex = "\n  Did you mean '"+names.get(highestId)+"'?\nscore:"+highestScore;
         }
-        App.runtimeError(name, "Undefined variable '" + name.getLexeme()+"'" + ex);
+        App.runtimeError(name, "Undefined variable '" + name.lexeme()+"'" + ex);
     }
 
 
@@ -130,7 +132,6 @@ public class Environment {
      * @param name     the name of the variable
      * @param distance how many levels up
      * @return the value of the variable
-     * @throws RuntimeError if variable is undefined
      */
     public Object getAt(String name, Integer distance) {
         return getDistParent(distance).variables.get(name);

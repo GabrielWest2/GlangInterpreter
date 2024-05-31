@@ -9,6 +9,7 @@ public abstract class Stmt {
  R visitFunctionStmt(Function stmt);
  R visitIfStmt(If stmt);
  R visitWhileStmt(While stmt);
+ R visitForEachStmt(ForEach stmt);
  R visitPrintStmt(Print stmt);
  R visitVarStmt(Var stmt);
  R visitReturnStmt(Return stmt);
@@ -82,6 +83,24 @@ public final Stmt body;
  @Override
  public <R> R accept(Visitor<R> visitor) {
  return visitor.visitWhileStmt(this);
+ }
+ }
+ public static class ForEach extends Stmt {
+ ForEach(Token var, Expr iterable, Stmt body, Token colon) {
+ this.var = var;
+ this.iterable = iterable;
+ this.body = body;
+ this.colon = colon;
+ }
+
+public final Token var;
+public final Expr iterable;
+public final Stmt body;
+public final Token colon;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitForEachStmt(this);
  }
  }
  public static class Print extends Stmt {

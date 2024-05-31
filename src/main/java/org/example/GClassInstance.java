@@ -1,6 +1,5 @@
 package org.example;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GClassInstance {
@@ -13,22 +12,22 @@ public class GClassInstance {
 
     @Override
     public String toString() {
-        return "instance##" + clazz.getName();
+        return "instance##" + clazz.name();
     }
 
     Object get(Token name) {
-        if (fields.containsKey(name.getLexeme())) {
-            return fields.get(name.getLexeme());
+        if (fields.containsKey(name.lexeme())) {
+            return fields.get(name.lexeme());
         }
 
-        GFunction method = clazz.findMethod(name.getLexeme());
+        GFunction method = clazz.findMethod(name.lexeme());
         if(method != null) return method.bind(this);
 
-        App.runtimeError(name,"Undefined property '" + name.getLexeme() + "'");
+        App.runtimeError(name,"Undefined property '" + name.lexeme() + "'");
         return null;
     }
 
     void set(Token name, Object value) {
-        fields.put(name.getLexeme(), value);
+        fields.put(name.lexeme(), value);
     }
 }

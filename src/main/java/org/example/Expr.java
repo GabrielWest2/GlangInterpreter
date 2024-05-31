@@ -7,6 +7,7 @@ public abstract class Expr {
  R visitAssignExpr(Assign expr);
  R visitAdditionAssignExpr(AdditionAssign expr);
  R visitArrayAssignExpr(ArrayAssign expr);
+ R visitAdditionArrayAssignExpr(AdditionArrayAssign expr);
  R visitBinaryExpr(Binary expr);
  R visitGetExpr(Get expr);
  R visitSetExpr(Set expr);
@@ -65,6 +66,22 @@ public final Expr value;
  @Override
  public <R> R accept(Visitor<R> visitor) {
  return visitor.visitArrayAssignExpr(this);
+ }
+ }
+ public static class AdditionArrayAssign extends Expr {
+ AdditionArrayAssign(Expr postfix, Token eq, Expr value) {
+ this.postfix = postfix;
+ this.eq = eq;
+ this.value = value;
+ }
+
+public final Expr postfix;
+public final Token eq;
+public final Expr value;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitAdditionArrayAssignExpr(this);
  }
  }
  public static class Binary extends Expr {

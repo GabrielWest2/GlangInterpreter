@@ -20,4 +20,10 @@ public interface GCallable {
      */
     Object call(Interpreter interpreter, List<Object> arguments);
 
+    /**
+     * Checks to see if this function is a wrapped function.
+     * Wrapped functions should be prefixed with an underscore ['_']
+     * @return if the function is native
+     */
+    boolean isWrapped();
 }

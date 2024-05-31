@@ -1,0 +1,91 @@
+class List {
+    constructor() {
+        this.arr = _createArrayList();
+    }
+
+    get(index){
+        return _getArrayListItem(this.arr, index);
+    }
+
+    add(item){
+        _addArrayListItem(this.arr, item);
+        return this;
+    }
+
+    set(index, item){
+        _setArrayListItem(this.arr, index, item);
+        return this;
+    }
+
+    set(index, item){
+        _setArrayListItem(this.arr, index, item);
+        return this;
+    }
+
+    length(){
+        return _getArrayListLength(this.arr);
+    }
+
+    toString(){
+        var s = "[";
+        var len = this.length();
+        for(var v = 0; v < len; v += 1){
+            s += this.get(v);
+            if(v < len - 1){
+                s += ", ";
+            }
+        }
+        s += "]";
+        return s;
+    }
+}
+class Pair {
+    constructor(k, v){
+        this.k = k;
+        this.v = v;
+    }
+}
+
+class Dict {
+    constructor() {
+        this.map = _createHashMap();
+        this.pairs = _createArrayList();
+    }
+
+    put(k, v) {
+        _putHashMap(this.map, k, v);
+        _addArrayListItem(this.pairs, Pair(k, v));
+        return this;
+    }
+
+    get(k) {
+        return _getHashMap(this.map, k);
+    }
+
+    containsKey(k){
+        return _containsHashMapKey(this.map, k);
+    }
+
+    containsValue(v){
+        return _containsHashMapValue(this.map, v);
+    }
+
+    remove(k){
+        return _removeHashMapValue(this.map, k);
+    }
+
+    toString(){
+            var s = "{";
+            var len = this.pairs.length();
+            //for(var v = 0; v < len; v += 1){
+                //var pair = this.pairs.get(v);
+                //s += pair.k + "=" + pair.v;
+                //if(v < len - 1){
+                //    s += ", ";
+                //}
+            //}
+            s += "}";
+            return s;
+        }
+}
+var __END_WRAPPER_DECL__;

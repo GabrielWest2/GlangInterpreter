@@ -38,16 +38,16 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private void declare(Token name) {
         if (scopes.isEmpty()) return;
         HashMap<String, Boolean> scope = scopes.peek();
-        if(scope.containsKey(name.getLexeme())){
+        if(scope.containsKey(name.lexeme())){
             App.resolveError(name, "Variable already declared in this scope.");
         }
-        scope.put(name.getLexeme(), false);
+        scope.put(name.lexeme(), false);
     }
 
     private void define(Token name) {
         if (scopes.isEmpty()) return;
         HashMap<String, Boolean> scope = scopes.peek();
-        scope.put(name.getLexeme(), true);
+        scope.put(name.lexeme(), true);
     }
 
     private void beginScope(){
@@ -70,7 +70,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private void resolveLocal(Expr expr, Token name) {
         for (int i = scopes.size() - 1; i >= 0; i--) {
-            if (scopes.get(i).containsKey(name.getLexeme())) {
+            if (scopes.get(i).containsKey(name.lexeme())) {
                 interpreter.resolve(expr, scopes.size() - 1 - i);
                 return;
             }
@@ -112,6 +112,13 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitArrayAssignExpr(Expr.ArrayAssign expr) {
+        resolve(expr.postfix);
+        resolve(expr.value);
+        return null;
+    }
+
+    @Override
+    public Void visitAdditionArrayAssignExpr(Expr.AdditionArrayAssign expr) {
         resolve(expr.postfix);
         resolve(expr.value);
         return null;
@@ -214,7 +221,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitVariableExpr(Expr.Variable expr) {
         if (!scopes.isEmpty() &&
-                scopes.peek().get(expr.name.getLexeme()) == Boolean.FALSE) {
+                scopes.peek().get(expr.name.lexeme()) == Boolean.FALSE) {
             App.resolveError(expr.name, "Can't read local variable in its own initializer.");
         }
         resolveLocal(expr, expr.name);
@@ -271,6 +278,17 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitForEachStmt(Stmt.ForEach stmt) {
+        beginScope();
+        declare(stmt.var);
+        resolve(stmt.iterable);
+        resolve(stmt.body);
+        define(stmt.var);
+        endScope();
+        return null;
+    }
+
+    @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         resolve(stmt.expression);
         return null;
@@ -309,7 +327,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
         declare(stmt.name);
         define(stmt.name);
-        if(hasBaseClass && stmt.base.name.getLexeme().equals(stmt.name.getLexeme())){
+        if(hasBaseClass && stmt.base.name.lexeme().equals(stmt.name.lexeme())){
             App.resolveError(stmt.name, "Class cannot inherit from itself");
         }
 
@@ -326,7 +344,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         scopes.peek().put("this", true);
 
         for(Stmt.Function func : stmt.methods){
-            resolveFunction(func,  (func.name.getLexeme().equals("constructor") ? FunctionType.CONSTRUCTOR : FunctionType.METHOD));
+            resolveFunction(func,  (func.name.lexeme().equals("constructor") ? FunctionType.CONSTRUCTOR : FunctionType.METHOD));
         }
 
         endScope();
