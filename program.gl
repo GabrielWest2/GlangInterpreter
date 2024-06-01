@@ -1,9 +1,4 @@
-var arrs = [[1, 2], [1, 2, 3, 4], [3], [1, 2, 3]];
-
-var testlist = List().add(67).add(2).add(3).set(0, 12);
-
-
-def add(a, b) {
+/*def add(a, b) {
     return a + b;
 }
 
@@ -19,14 +14,10 @@ def div(a, b) {
     return a / b;
 }
 
-var funcs = [add, sub, mul, div];
+var funcs = [add, sub, mul, div];*/
 
-foreach(var func : funcs){
-    print(func(6, 2));
-}
+var numMap = Dict().put("a", 89.1).put(12.1, 345.1);
 
-var letters = Dict().put("a", 1).put("b", 2).put("c", 3).put("d", 4).put("e", 5);
-print letters.toString();
-foreach(var pair : letters.pairs){
-    print "pair " + pair.k + ":" + pair.v;
+foreach(var pair : numMap){
+    print("test: " + pair.k);
 }

@@ -6,7 +6,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     private final Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
-
+    public final Map<String, GClass> wrapperClasses = new HashMap<>();
     public Interpreter() {
         StandardLibCreator.defineStandardLib(globals);
     }
@@ -124,7 +124,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         if (o1 instanceof String && o2 instanceof Double) {
             return o1 + stringify(o2);
         }
-        App.runtimeError(operator, "Expected numbers, or strings.");
+        App.runtimeError(operator, "Expected numbers, or strings. Got: " + o1.getClass().getSimpleName() + "  +  " + o2.getClass().getSimpleName());
         return null;
     }
 
@@ -510,13 +510,36 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
         Object iterable = evaluate(stmt.iterable);
         List<Object> items = new ArrayList<>();
-        if((!iterable.getClass().isArray()) && (!(iterable instanceof List))){
+
+        GClass wrappedList = wrapperClasses.get("List");
+        GClass wrappedMap = wrapperClasses.get("Dict");
+        GClass wrappedPair = wrapperClasses.get("Pair");
+
+        if((!iterable.getClass().isArray())
+                && (!(iterable instanceof List))
+                && (!(iterable instanceof GClassInstance))
+                && (!(iterable instanceof Map))){
             App.runtimeError(stmt.colon, "Expected iterable object here");
         }else{
             if(iterable.getClass().isArray()){
                 items.addAll(List.of((Object[]) iterable));
-            }else{
+            }else if(iterable instanceof List){
                 items.addAll((List)iterable);
+            }else if(iterable instanceof GClassInstance){
+                GClassInstance iterableClassInstance = (GClassInstance) iterable;
+                if(iterableClassInstance.getGClass().equals(wrappedList)){
+                    List<Object> vals = (List<Object>) iterableClassInstance.getField("arr");
+                    items.addAll(vals);
+                }else if(iterableClassInstance.getGClass().equals(wrappedMap)){
+                    HashMap<Object, Object> vals = (HashMap<Object, Object>) iterableClassInstance.getField("map");
+                    for(Map.Entry<Object, Object> entry : vals.entrySet()){
+                        GClassInstance pair = (GClassInstance) wrappedPair.call(this, List.of(entry.getKey(), entry.getValue()));
+                        items.add(pair);
+                    }
+                }else{
+                    App.runtimeError(stmt.colon, "Expected iterable object here");
+                }
+
             }
         }
 
@@ -587,7 +610,9 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
 
         GClass clazz = new GClass(stmt.name.lexeme(), methods, baseclass);
-
+        if(!environment.isDeclaredHere("__END_WRAPPER_DECL__")){
+            wrapperClasses.put(clazz.name(), clazz);
+        }
         if(stmt.base != null){
             environment = environment.getParent();
         }

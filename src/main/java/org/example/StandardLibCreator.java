@@ -168,7 +168,7 @@ public class StandardLibCreator {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
-                return new HashMap<Integer, Object>();
+                return new HashMap<Object, Object>();
             }
             @Override
             public boolean isWrapped() {
@@ -183,7 +183,7 @@ public class StandardLibCreator {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
-                return ((HashMap<Integer, Object>)arguments.get(0)).put(arguments.get(1).hashCode(), arguments.get(2));
+                return ((HashMap<Object, Object>)arguments.get(0)).put(arguments.get(1), arguments.get(2));
             }
             @Override
             public boolean isWrapped() {
@@ -198,7 +198,7 @@ public class StandardLibCreator {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
-                return ((HashMap<Integer, Object>)arguments.get(0)).get(arguments.get(1).hashCode());
+                return ((HashMap<Object, Object>)arguments.get(0)).get(arguments.get(1));
             }
             @Override
             public boolean isWrapped() {
@@ -213,7 +213,7 @@ public class StandardLibCreator {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
-                return ((HashMap<Integer, Object>)arguments.get(0)).containsKey(arguments.get(1).hashCode());
+                return ((HashMap<Object, Object>)arguments.get(0)).containsKey(arguments.get(1));
             }
             @Override
             public boolean isWrapped() {
@@ -228,7 +228,7 @@ public class StandardLibCreator {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
-                return ((HashMap<Integer, Object>)arguments.get(0)).containsValue(arguments.get(1));
+                return ((HashMap<Object, Object>)arguments.get(0)).containsValue(arguments.get(1));
             }
             @Override
             public boolean isWrapped() {
@@ -243,7 +243,7 @@ public class StandardLibCreator {
 
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
-                return ((HashMap<Integer, Object>)arguments.get(0)).remove(arguments.get(1).hashCode());
+                return ((HashMap<Object, Object>)arguments.get(0)).remove(arguments.get(1));
             }
             @Override
             public boolean isWrapped() {

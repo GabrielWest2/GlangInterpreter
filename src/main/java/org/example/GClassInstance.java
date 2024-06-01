@@ -27,7 +27,22 @@ public class GClassInstance {
         return null;
     }
 
+    Object getField(String name) {
+        if (fields.containsKey(name)) {
+            return fields.get(name);
+        }
+        return null;
+    }
+
     void set(Token name, Object value) {
         fields.put(name.lexeme(), value);
+    }
+
+    public GClass getGClass() {
+        return clazz;
+    }
+
+    public HashMap<String, Object> getFields() {
+        return fields;
     }
 }

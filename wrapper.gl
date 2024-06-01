@@ -44,17 +44,19 @@ class Pair {
         this.k = k;
         this.v = v;
     }
+
+    toString(){
+        return this.k + "=" + this.v;
+    }
 }
 
 class Dict {
     constructor() {
         this.map = _createHashMap();
-        this.pairs = _createArrayList();
     }
 
     put(k, v) {
         _putHashMap(this.map, k, v);
-        _addArrayListItem(this.pairs, Pair(k, v));
         return this;
     }
 
@@ -73,19 +75,5 @@ class Dict {
     remove(k){
         return _removeHashMapValue(this.map, k);
     }
-
-    toString(){
-            var s = "{";
-            var len = this.pairs.length();
-            //for(var v = 0; v < len; v += 1){
-                //var pair = this.pairs.get(v);
-                //s += pair.k + "=" + pair.v;
-                //if(v < len - 1){
-                //    s += ", ";
-                //}
-            //}
-            s += "}";
-            return s;
-        }
 }
 var __END_WRAPPER_DECL__;

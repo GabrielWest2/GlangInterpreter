@@ -45,7 +45,7 @@ public class App
         try {
             return StringUtils.split(program, "\n")[linenum - 1];
 
-        }finally {
+        }catch (IndexOutOfBoundsException e){
             return "Invalid line";
         }
     }
