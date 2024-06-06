@@ -11,7 +11,7 @@ public class GFunction implements GCallable{
      * Create new function
      *
      * @param declaration   the {@code Stmt.Function} statement in which this function was defined
-     * @param closure       persistant local scope
+     * @param closure       persistent local scope
      * @param isInitializer is the function a constructor for a class?
      * @see Stmt.Function
      */
@@ -26,7 +26,7 @@ public class GFunction implements GCallable{
      * Create new function
      *
      * @param declaration   the {@code Stmt.Function} statement in which this function was defined
-     * @param closure       persistant local scope
+     * @param closure       persistent local scope
      * @param isInitializer is the function a constructor for a class?
      * @see Stmt.Function
      */
