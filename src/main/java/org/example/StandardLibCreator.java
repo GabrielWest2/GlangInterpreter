@@ -2,13 +2,11 @@ package org.example;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class StandardLibCreator {
-    public static void defineStandardLib(Environment globals) {
+    public static void defineStandardLib(Environment globals, Interpreter interpreter) {
+        Scanner scanner = new Scanner(System.in);
         globals.define("PI", Math.PI);
 
         globals.define("clock", new GCallable() {
@@ -28,7 +26,7 @@ public class StandardLibCreator {
             }
         });
 
-        globals.define("print", new GCallable() {
+        globals.define("println", new GCallable() {
             @Override
             public int arity() {
                 return 1;
@@ -38,6 +36,40 @@ public class StandardLibCreator {
             public Object call(Interpreter interpreter, List<Object> arguments) {
                 System.out.println(arguments.get(0));
                 return null;
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return false;
+            }
+        });
+
+        globals.define("scanLine", new GCallable() {
+            @Override
+            public int arity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return scanner.nextLine();
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return false;
+            }
+        });
+
+        globals.define("toNum", new GCallable() {
+            @Override
+            public int arity() {
+                return 1;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return Double.parseDouble(arguments.get(0).toString());
             }
 
             @Override
@@ -250,6 +282,62 @@ public class StandardLibCreator {
                 return true;
             }
         });
+        globals.define("_getKeysHashmap", new GCallable() {
+            @Override
+            public int arity() {
+                return 1;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                HashMap<Object, Object> map = (HashMap<Object, Object>)arguments.get(0);
+                return new ArrayList<>(map.keySet());
+            }
+            @Override
+            public boolean isWrapped() {
+                return true;
+            }
+        });
+        globals.define("_getValuesHashmap", new GCallable() {
+            @Override
+            public int arity() {
+                return 1;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                HashMap<Object, Object> map = (HashMap<Object, Object>)arguments.get(0);
+                return new ArrayList<>(map.values());
+            }
+            @Override
+            public boolean isWrapped() {
+                return true;
+            }
+        });
+        globals.define("_getPairsHashmap", new GCallable() {
+            @Override
+            public int arity() {
+                return 1;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                HashMap<Object, Object> map = (HashMap<Object, Object>)arguments.get(0);
+                List<Object> pairs = new ArrayList<>();
+                GClass wrappedPair = interpreter.wrapperClasses.get("Pair");
+                for (Map.Entry<?, ?> entry : map.entrySet()) {
+                    GClassInstance pair = (GClassInstance) wrappedPair.call(interpreter, List.of(entry.getKey(), entry.getValue()));
+                    pairs.add(pair);
+                }
+                return pairs.toArray();
+            }
+            @Override
+            public boolean isWrapped() {
+                return true;
+            }
+        });
+
+
 
         globals.define("len", new GCallable() {
             @Override
@@ -266,7 +354,6 @@ public class StandardLibCreator {
                 if(arg1.getClass().isArray()){
                     return (double)((Object[])arg1).length;
                 }
-                System.out.println("BAD BAD");
                 return null;
             }
 

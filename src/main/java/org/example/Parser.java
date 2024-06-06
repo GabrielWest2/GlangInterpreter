@@ -252,7 +252,6 @@ public class Parser {
             } else if(expr instanceof Expr.Postfix){
                 Expr.Postfix postfix = ((Expr.Postfix)expr);
                 if(postfix.operator.tokenType() == TokenType.LEFT_BRACKET){
-                    System.out.println( "assign arr index");
                     return new Expr.ArrayAssign(postfix, equals, value);
                 }
             }
@@ -276,7 +275,6 @@ public class Parser {
             }else if(expr instanceof Expr.Postfix){
                 Expr.Postfix postfix = ((Expr.Postfix)expr);
                 if(postfix.operator.tokenType() == TokenType.LEFT_BRACKET){
-                    System.out.println( "assign arr index");
                     return new Expr.AdditionArrayAssign(postfix, equals, value);
                 }
             }

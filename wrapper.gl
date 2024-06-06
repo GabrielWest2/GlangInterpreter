@@ -39,6 +39,11 @@ class List {
         return s;
     }
 }
+
+
+
+
+
 class Pair {
     constructor(k, v){
         this.k = k;
@@ -49,6 +54,9 @@ class Pair {
         return this.k + "=" + this.v;
     }
 }
+
+
+
 
 class Dict {
     constructor() {
@@ -74,6 +82,27 @@ class Dict {
 
     remove(k){
         return _removeHashMapValue(this.map, k);
+    }
+
+    getKeys(){
+        return _getKeysHashmap(this.map);
+    }
+
+    getValues(){
+        return _getValuesHashmap(this.map);
+    }
+
+    getPairs(){
+        return _getPairsHashmap(this.map);
+    }
+
+    toString(){
+        var s = "[ ";
+        foreach(var pair : this){
+            s += pair.toString() + " ";
+        }
+
+        return s + "]";
     }
 }
 var __END_WRAPPER_DECL__;

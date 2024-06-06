@@ -279,12 +279,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitForEachStmt(Stmt.ForEach stmt) {
-        beginScope();
+       // beginScope();
         declare(stmt.var);
+        define(stmt.var);
         resolve(stmt.iterable);
         resolve(stmt.body);
-        define(stmt.var);
-        endScope();
+       // endScope();
         return null;
     }
 

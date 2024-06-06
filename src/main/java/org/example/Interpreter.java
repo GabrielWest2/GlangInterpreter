@@ -8,7 +8,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     private final Map<Expr, Integer> locals = new HashMap<>();
     public final Map<String, GClass> wrapperClasses = new HashMap<>();
     public Interpreter() {
-        StandardLibCreator.defineStandardLib(globals);
+        StandardLibCreator.defineStandardLib(globals, this);
     }
 
     void interpret(List<Stmt> statements) {
@@ -515,40 +515,45 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         GClass wrappedMap = wrapperClasses.get("Dict");
         GClass wrappedPair = wrapperClasses.get("Pair");
 
+        // Check to make sure that iterable is actually iterable
         if((!iterable.getClass().isArray())
                 && (!(iterable instanceof List))
                 && (!(iterable instanceof GClassInstance))
                 && (!(iterable instanceof Map))){
             App.runtimeError(stmt.colon, "Expected iterable object here");
-        }else{
-            if(iterable.getClass().isArray()){
-                items.addAll(List.of((Object[]) iterable));
-            }else if(iterable instanceof List){
-                items.addAll((List)iterable);
-            }else if(iterable instanceof GClassInstance){
-                GClassInstance iterableClassInstance = (GClassInstance) iterable;
-                if(iterableClassInstance.getGClass().equals(wrappedList)){
-                    List<Object> vals = (List<Object>) iterableClassInstance.getField("arr");
+        }
+
+
+        if(iterable.getClass().isArray()){
+            items.addAll(List.of((Object[]) iterable));
+        }else if(iterable instanceof List<?> iterableList){
+            items.addAll(iterableList);
+        }else if(iterable instanceof GClassInstance iterableClassInstance){
+            if(iterableClassInstance.getGClass().equals(wrappedList)){
+                Object arrObj = iterableClassInstance.getField("arr");
+                if(arrObj instanceof List<?> vals) {
                     items.addAll(vals);
-                }else if(iterableClassInstance.getGClass().equals(wrappedMap)){
-                    HashMap<Object, Object> vals = (HashMap<Object, Object>) iterableClassInstance.getField("map");
-                    for(Map.Entry<Object, Object> entry : vals.entrySet()){
+                }
+            }else if(iterableClassInstance.getGClass().equals(wrappedMap)){
+                if(iterableClassInstance.getField("map") instanceof Map<?,?> vals) {
+                    for (Map.Entry<?, ?> entry : vals.entrySet()) {
                         GClassInstance pair = (GClassInstance) wrappedPair.call(this, List.of(entry.getKey(), entry.getValue()));
                         items.add(pair);
                     }
-                }else{
-                    App.runtimeError(stmt.colon, "Expected iterable object here");
                 }
-
+            }else{
+                App.runtimeError(stmt.colon, "Expected iterable object here");
             }
         }
 
-        environment = new Environment(environment);
+        //Environment parent = environment;
+        //environment = new Environment(parent);
         for(Object o : items){
+
             environment.define(stmt.var.lexeme(), o);
             execute(stmt.body);
         }
-        environment = environment.getParent();
+        //environment = parent;
 
 
         return null;
@@ -557,7 +562,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         Object value = evaluate(stmt.expression);
-        System.out.println(stringify(value));
+        System.out.print(stringify(value));
         return null;
     }
 
