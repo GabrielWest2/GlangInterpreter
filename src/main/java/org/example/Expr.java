@@ -1,5 +1,3 @@
-// COMPUTER GENERATED DO NOT EDIT
-// CREATED BY A TOOL DESCRIBED IN 'WRITING INTERPRETERS'
 package org.example;
 
 import java.util.List;

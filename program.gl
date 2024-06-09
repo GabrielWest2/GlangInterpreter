@@ -9,19 +9,20 @@ var board = [
 ];
 
 def getPlayerChar(u) {
-    if(u == 0) return " ";
-    if(u == 1) return "X";
-    if(u == 2) return "O";
+    switch(u){
+        case 1 return "X";
+        case 2 return "O";
+        case default return " ";
+    }
 }
 
 
 def printBoard(){
-    print("\n");
+    println("");
     for(var i = 0; i < 7; i++){
         print("[ " + i +" ]");
     }
-    print("\n");
-    print("===================================\n");
+    println("\n===================================");
 
     for(var c = 5; c >= 0; c--){
         print("| ");
@@ -29,7 +30,7 @@ def printBoard(){
             print(getPlayerChar(board[c][r]));
             print(r == 6 ? " |" : " || ");
         }
-        print("\n");
+        println("");
     }
 }
 
@@ -116,55 +117,48 @@ def dropPiece(team, col){
 }
 
 
-    def isGameOver(){
-        if(checkPlayerWin(1)) {
-            println("Player 1 won!");
-            return true;
-        }
-        if(checkPlayerWin(2)) {
-            println("Player 1 won!");
-            return true;
-        }
-
-         // Check for full board
-        if(board[5][0] != 0 and board[5][1] != 0 and board[5][2] != 0 and board[5][3] != 0
-                          and board[5][4] != 0 and board[5][5] != 0 and board[5][6] != 0){
-            println("Tie game!");
-            return true;
-        }
-        return false;
+def isGameOver(){
+    if(checkPlayerWin(1)) {
+        println("Player 1 won!");
+        return true;
     }
+    if(checkPlayerWin(2)) {
+        println("Player 1 won!");
+        return true;
+    }
+
+     // Check for full board
+    if(board[5][0] != 0 and board[5][1] != 0 and board[5][2] != 0 and board[5][3] != 0
+                      and board[5][4] != 0 and board[5][5] != 0 and board[5][6] != 0){
+        println("Tie game!");
+        return true;
+    }
+    return false;
+}
 
 
 var team = 1;
 while(!isGameOver()){
     printBoard();
-    while(!dropPiece(team, toNum(scanLine()))){
+    while(!dropPiece(team, scanNum())){
         println("You can't drop here!");
     }
     printBoard();
     team = team == 1 ? 2 : 1;
-}*/
+}
+*/
 
 
+var v = 9;
 
-class Animal {
-    noise(){
-        println("*silence*");
+switch(v){
+    case 9 {
+        println("twas nine!");
+        break;
+    }
+    case 9 {
+        println("twas nine again!");
     }
 }
 
-class Dog extends Animal {
-    noise(){
-        println("bark!");
-    }
-}
-
-class Cat extends Animal {
-
-}
-
-var animal1 = Dog();
-animal1.noise();
-var animal2 = Cat();
-animal2.noise();
+println("over");

@@ -1,8 +1,6 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Parser {
 
@@ -72,8 +70,46 @@ public class Parser {
         if(match(TokenType.RETURN)){
             return returnStatement();
         }
+        if(match(TokenType.BREAK)){
+            return breakStatement();
+        }
+        if(match(TokenType.SWITCH)){
+            return switchStatement();
+        }
         return expressionStatement();
 
+    }
+
+    private Stmt switchStatement() {
+        Token swt = prev();
+        Token lp = consume(TokenType.LEFT_PAREN, "Expect ( after name switch");
+        Expr expr = expression();
+        Token rp = consume(TokenType.RIGHT_PAREN, "Expect ) after name switch expr");
+        consume(TokenType.LEFT_BRACE, "Expect { before body of switch");
+
+        Stmt defaultStmt = null;
+        List<Expr> cases = new ArrayList<>();
+        List<Stmt> caseBodies = new ArrayList<>();
+        while (!match(TokenType.RIGHT_BRACE)){
+            consume(TokenType.CASE, "Expect case declaration");
+            if(match(TokenType.DEFAULT)){
+                defaultStmt = statement();
+            }else{
+                Expr lit = primary();
+                Stmt stmt = statement();
+                cases.add(lit);
+                caseBodies.add(stmt);
+            }
+        }
+
+        return new Stmt.Switch(expr, swt, caseBodies, cases, defaultStmt);
+
+    }
+
+    private Stmt breakStatement() {
+        Token brk = prev();
+        consume(TokenType.SEMICOLON, "Line should be followed by semicolon");
+        return new Stmt.Break(brk);
     }
 
     private Stmt classStatement() {
@@ -109,6 +145,11 @@ public class Parser {
         return new Stmt.Return(rtrn, val);
     }
 
+    /**
+     * Parse function declaration
+     * @param type {@code String} containing either 'function' or 'method'
+     * @return the parsed function stmt
+     */
     private Stmt.Function function(String type){
         Token name = consume(TokenType.IDENTIFIER, "Expected name of " + type);
         Token lp = consume(TokenType.LEFT_PAREN, "Expect ( after name of " + type);
@@ -447,6 +488,7 @@ public class Parser {
             }
             return new Expr.ArrayInit(exprs);
         }
+
         App.parseError(curr(), "Unexpected token.");
         return null;
     }

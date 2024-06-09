@@ -499,9 +499,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        while(isTruthy(evaluate(stmt.condition))){
-            execute(stmt.body);
+        try {
+            while(isTruthy(evaluate(stmt.condition))){
+                execute(stmt.body);
+            }
+        }catch (BreakFrom ignored){
+
         }
+
         return null;
     }
 
@@ -546,14 +551,20 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             }
         }
 
+
+        try {
         //Environment parent = environment;
         //environment = new Environment(parent);
-        for(Object o : items){
 
-            environment.define(stmt.var.lexeme(), o);
-            execute(stmt.body);
-        }
-        //environment = parent;
+
+
+            for (Object o : items) {
+
+                environment.define(stmt.var.lexeme(), o);
+                execute(stmt.body);
+            }
+            //environment = parent;
+        }catch (BreakFrom ignored){}
 
 
         return null;
@@ -581,10 +592,36 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
         Object value = null;
+
         if(stmt.value != null) {
             value = evaluate(stmt.value);
         }
         throw new ReturnValue(value);
+    }
+
+    @Override
+    public Void visitSwitchStmt(Stmt.Switch stmt) {
+        Object switching = evaluate(stmt.expression);
+        boolean hasMatched = false;
+        try {
+            for (int i = 0; i < stmt.caseValues.size(); i++) {
+                Object o = evaluate(stmt.caseValues.get(i));
+                if (o.equals(switching)) {
+                    execute(stmt.caseBodies.get(i));
+                    hasMatched = true;
+                }
+            }
+
+            if (stmt.defaultCase != null && !hasMatched) {
+                execute(stmt.defaultCase);
+            }
+        } catch (BreakFrom ignored) {}
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        throw new BreakFrom();
     }
 
     @Override

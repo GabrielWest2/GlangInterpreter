@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -12,8 +13,16 @@ import java.util.Stack;
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Stack<HashMap<String, Boolean>> scopes;
     private FunctionType functionType = FunctionType.NONE;
+    private LoopType loopType = LoopType.NONE;
     private ClassType classType = ClassType.NONE;
+    private SwitchType switchType = SwitchType.NONE;
 
+
+    private enum SwitchType {
+        NONE, SWITCH;
+    }private enum LoopType {
+        NONE, WHILE, FOREACH;
+    }
     private enum FunctionType {
         NONE, FUNCTION, METHOD, CONSTRUCTOR;
     }
@@ -272,19 +281,29 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
+        LoopType outerType = loopType;
+        loopType = LoopType.WHILE;
         resolve(stmt.condition);
         resolve(stmt.body);
+        loopType = outerType;
         return null;
     }
 
     @Override
     public Void visitForEachStmt(Stmt.ForEach stmt) {
+        LoopType outerType = loopType;
+        loopType = LoopType.WHILE;
+
+
        // beginScope();
         declare(stmt.var);
         define(stmt.var);
         resolve(stmt.iterable);
         resolve(stmt.body);
        // endScope();
+
+
+        loopType = outerType;
         return null;
     }
 
@@ -315,6 +334,35 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
                 App.resolveError(stmt.keyword, "Cannot return a value here");
             }
             resolve(stmt.value);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitSwitchStmt(Stmt.Switch stmt) {
+        SwitchType outerType = switchType;
+        switchType = SwitchType.SWITCH;
+
+        resolve(stmt.expression);
+
+        for(int i = 0; i < stmt.caseValues.size(); i++){
+            Expr literal = stmt.caseValues.get(i);
+            Stmt stmt1 = stmt.caseBodies.get(i);
+            resolve(literal);
+            resolve(stmt1);
+        }
+
+        if(stmt.defaultCase != null){
+            resolve(stmt.defaultCase);
+        }
+        switchType = outerType;
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        if(loopType == LoopType.NONE && switchType == SwitchType.NONE){
+            App.resolveError(stmt.keyword, "Cannot break from here");
         }
         return null;
     }

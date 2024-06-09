@@ -60,6 +60,11 @@ public enum TokenType {
     TRUE("^true(?![_a-zA-Z0-9])"),
     VAR("^var(?![_a-zA-Z0-9])"),
     WHILE("^while(?![_a-zA-Z0-9])"),
+    BREAK("^break(?![_a-zA-Z0-9])"),
+    SWITCH("^switch(?![_a-zA-Z0-9])"),
+    CASE("^case(?![_a-zA-Z0-9])"),
+    DEFAULT("^default(?![_a-zA-Z0-9])"),
+
 
     // Literals.
     STRING("^\\\"(\\\\.|[^\\\"\\\\])*\\\""),

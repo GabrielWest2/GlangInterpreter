@@ -1,10 +1,17 @@
 package org.example;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+/**
+ * Contains default functions and constants
+ */
 public class StandardLibCreator {
+    /**
+     * Defines all standard library constants and functions
+     * @param globals
+     * @param interpreter
+     */
     public static void defineStandardLib(Environment globals, Interpreter interpreter) {
         Scanner scanner = new Scanner(System.in);
         globals.define("PI", Math.PI);
@@ -43,6 +50,24 @@ public class StandardLibCreator {
                 return false;
             }
         });
+
+        globals.define("scanNum", new GCallable() {
+            @Override
+            public int arity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return scanner.nextDouble();
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return false;
+            }
+        });
+
 
         globals.define("scanLine", new GCallable() {
             @Override
@@ -338,6 +363,31 @@ public class StandardLibCreator {
         });
 
 
+
+        globals.define("range", new GCallable() {
+            @Override
+            public int arity() {
+                return 2;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                int arg1 = (int)((Double)arguments.get(0)).doubleValue();
+                int arg2 = (int)((Double)arguments.get(1)).doubleValue();
+
+                Object[] nums = new Object[arg2 - arg1];
+                int i = 0;
+                for(double d = (double) arg1; d < arg2; d += 1.0){
+                    nums[i++] = d;
+                }
+                return nums;
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return false;
+            }
+        });
 
         globals.define("len", new GCallable() {
             @Override

@@ -1,5 +1,3 @@
-// COMPUTER GENERATED DO NOT EDIT
-// CREATED BY A TOOL DESCRIBED IN 'WRITING INTERPRETERS'
 package org.example;
 
 import java.util.List;
@@ -15,6 +13,8 @@ public abstract class Stmt {
  R visitPrintStmt(Print stmt);
  R visitVarStmt(Var stmt);
  R visitReturnStmt(Return stmt);
+ R visitSwitchStmt(Switch stmt);
+ R visitBreakStmt(Break stmt);
  R visitClassStmt(Class stmt);
  }
  public static class Block extends Stmt {
@@ -143,6 +143,39 @@ public final Expr value;
  @Override
  public <R> R accept(Visitor<R> visitor) {
  return visitor.visitReturnStmt(this);
+ }
+ }
+
+ public static class Switch extends Stmt {
+ Switch(Expr expression, Token keyword, List<Stmt> caseBodies, List<Expr> caseValues, Stmt defaultCase) {
+ this.expression = expression;
+ this.keyword = keyword;
+ this.caseBodies = caseBodies;
+ this.caseValues = caseValues;
+ this.defaultCase = defaultCase;
+ }
+
+public final Expr expression;
+public final Token keyword;
+public final List<Stmt> caseBodies;
+public final List<Expr> caseValues;
+public final Stmt defaultCase;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitSwitchStmt(this);
+ }
+ }
+ public static class Break extends Stmt {
+ Break(Token keyword) {
+ this.keyword = keyword;
+ }
+
+public final Token keyword;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitBreakStmt(this);
  }
  }
  public static class Class extends Stmt {
