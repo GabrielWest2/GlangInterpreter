@@ -1,0 +1,73 @@
+var board = [
+    [" ", " ", " "],
+    [" ", " ", " "],
+    [" ", " ", " "]
+];
+
+def printBoard() {
+    println("\n    0 | 1 | 2 ");
+    println("  -------------");
+    for (var i = 0; i < 3; i++) {
+        print(i + " | ");
+        for (var j = 0; j < 3; j++) {
+            print(board[i][j]);
+            print(" | ");
+        }
+        println("\n  -------------");
+    }
+}
+
+def checkWinner(player) {
+    // Check rows and columns
+    for (var i = 0; i < 3; i++) {
+        if (board[i][0] == player and board[i][1] == player and board[i][2] == player) return true; // Row
+        if (board[0][i] == player and board[1][i] == player and board[2][i] == player) return true; // Column
+    }
+
+    // Check diagonals
+    if (board[0][0] == player and board[1][1] == player and board[2][2] == player) return true; // Diagonal
+    if (board[0][2] == player and board[1][1] == player and board[2][0] == player) return true; // Anti-Diagonal
+
+    return false;
+}
+
+def isBoardFull() {
+    for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 3; j++) {
+            if (board[i][j] == " ") return false;
+        }
+    }
+    return true;
+}
+
+def makeMove(player, row, col) {
+    if (row < 0 or row > 2 or col < 0 or col > 2 or board[row][col] != " ") {
+        return false;
+    }
+    board[row][col] = player;
+    return true;
+}
+
+var currentPlayer = "X";
+while (!checkWinner("X") and !checkWinner("O") and !isBoardFull()) {
+    printBoard();
+    println("Player " + currentPlayer + "'s turn.");
+    print("Enter row (0-2): ");
+    var row = scanNum();
+    print("Enter column (0-2): ");
+    var col = scanNum();
+    if (makeMove(currentPlayer, row, col)) {
+        currentPlayer = (currentPlayer == "X") ? "O" : "X";
+    } else {
+        println("Invalid move! Try again.");
+    }
+}
+
+printBoard();
+if (checkWinner("X")) {
+    println("Player X wins!");
+} else if (checkWinner("O")) {
+    println("Player O wins!");
+} else {
+    println("It's a tie!");
+}

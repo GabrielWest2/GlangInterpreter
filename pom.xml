@@ -34,11 +34,10 @@
       <artifactId>reflections</artifactId>
       <version>0.9.11</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.baulsupp.kolja/jcurses -->
     <dependency>
-      <groupId>com.baulsupp.kolja</groupId>
-      <artifactId>jcurses</artifactId>
-      <version>0.9.5.3</version>
+      <groupId>com.googlecode.lanterna</groupId>
+      <artifactId>lanterna</artifactId>
+      <version>3.1.2</version>
     </dependency>
 
     <dependency>
