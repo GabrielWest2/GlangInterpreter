@@ -4,8 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class App 
@@ -13,7 +15,7 @@ public class App
     public static List<Token> tokens = new ArrayList<>();
     public static String program;
     public static Interpreter i;
-    public static void main( String[] args ) throws FileNotFoundException {
+    public static void main( String[] args ) throws IOException {
         if(args.length != 1){
             System.err.println("Usage: glang <program>");
             return;
@@ -21,7 +23,7 @@ public class App
 
         i = new Interpreter();
 
-        program = new Scanner(new File("wrapper.gl")).useDelimiter("\\Z").next();;
+        program = new Scanner(Objects.requireNonNull(App.class.getResourceAsStream("/wrapper.gl"))).useDelimiter("\\Z").next();;
         tokens.addAll(StandardLibCreator.getWrapperCode(program));
         program = new Scanner(new File(args[0])).useDelimiter("\\Z").next();
         tokens.addAll(new Tokenizer(program).tokenize(true));

@@ -69,7 +69,7 @@ public enum TokenType {
     // Literals.
     STRING("^\\\"(\\\\.|[^\\\"\\\\])*\\\""),
     NUMBER("^\\d+\\.?\\d*"),
-    IDENTIFIER("^[_a-zA-Z0-9]{1,31}"),
+    IDENTIFIER("^[_a-zA-Z\\p{So}_]{1,31}[_a-zA-Z0-9\\p{So}_]{0,31}"),
 
     // End of File
     EOF;

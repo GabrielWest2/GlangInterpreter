@@ -28,7 +28,7 @@ def printBoard(){
         print("| ");
         for(var r = 0; r < 7; r++){
             print(getPlayerChar(board[c][r]));
-            print(r == 6 ? " |" : " || ");
+            print(r == 6 ? " |" : " or ");
         }
         println("");
     }
@@ -147,18 +147,151 @@ while(!isGameOver()){
     team = team == 1 ? 2 : 1;
 }
 */
+/*
+var board = [
+    [" ", " ", " "],
+    [" ", " ", " "],
+    [" ", " ", " "]
+];
 
-
-var v = 9;
-
-switch(v){
-    case 9 {
-        println("twas nine!");
-        break;
-    }
-    case 9 {
-        println("twas nine again!");
+def printBoard() {
+    println("\n    0 | 1 | 2 ");
+    println("  -------------");
+    for (var i = 0; i < 3; i++) {
+        print(i + " | ");
+        for (var j = 0; j < 3; j++) {
+            print(board[i][j]);
+            print(" | ");
+        }
+        println("\n  -------------");
     }
 }
 
-println("over");
+def checkWinner(player) {
+    // Check rows and columns
+    for (var i = 0; i < 3; i++) {
+        if (board[i][0] == player and board[i][1] == player and board[i][2] == player) return true; // Row
+        if (board[0][i] == player and board[1][i] == player and board[2][i] == player) return true; // Column
+    }
+
+    // Check diagonals
+    if (board[0][0] == player and board[1][1] == player and board[2][2] == player) return true; // Diagonal
+    if (board[0][2] == player and board[1][1] == player and board[2][0] == player) return true; // Anti-Diagonal
+
+    return false;
+}
+
+def isBoardFull() {
+    for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 3; j++) {
+            if (board[i][j] == " ") return false;
+        }
+    }
+    return true;
+}
+
+def makeMove(player, row, col) {
+    if (row < 0 or row > 2 or col < 0 or col > 2 or board[row][col] != " ") {
+        return false;
+    }
+    board[row][col] = player;
+    return true;
+}
+
+var currentPlayer = "X";
+while (!checkWinner("X") and !checkWinner("O") and !isBoardFull()) {
+    printBoard();
+    println("Player " + currentPlayer + "'s turn.");
+    print("Enter row (0-2): ");
+    var row = scanNum();
+    print("Enter column (0-2): ");
+    var col = scanNum();
+    if (makeMove(currentPlayer, row, col)) {
+        currentPlayer = (currentPlayer == "X") ? "O" : "X";
+    } else {
+        println("Invalid move! Try again.");
+    }
+}
+
+printBoard();
+if (checkWinner("X")) {
+    println("Player X wins!");
+} else if (checkWinner("O")) {
+    println("Player O wins!");
+} else {
+    println("It's a tie!");
+}
+*/
+var 🍏 = [
+    [" ", " ", " "],
+    [" ", " ", " "],
+    [" ", " ", " "]
+];
+
+def 🍉() {
+    println("\n    0 | 1 | 2 ");
+    println("  -------------");
+    for (var 🍇 = 0; 🍇 < 3; 🍇++) {
+        print(🍇 + " | ");
+        for (var 🍊 = 0; 🍊 < 3; 🍊++) {
+            print(🍏[🍇][🍊]);
+            print(" | ");
+        }
+        println("\n  -------------");
+    }
+}
+
+def 🍋(🍌) {
+    // Check rows and columns
+    for (var 🍇 = 0; 🍇 < 3; 🍇++) {
+        if (🍏[🍇][0] == 🍌 and 🍏[🍇][1] == 🍌 and 🍏[🍇][2] == 🍌) return true; // Row
+        if (🍏[0][🍇] == 🍌 and 🍏[1][🍇] == 🍌 and 🍏[2][🍇] == 🍌) return true; // Column
+    }
+
+    // Check diagonals
+    if (🍏[0][0] == 🍌 and 🍏[1][1] == 🍌 and 🍏[2][2] == 🍌) return true; // Diagonal
+    if (🍏[0][2] == 🍌 and 🍏[1][1] == 🍌 and 🍏[2][0] == 🍌) return true; // Anti-Diagonal
+
+    return false;
+}
+
+def 🍇() {
+    for (var 🍇 = 0; 🍇 < 3; 🍇++) {
+        for (var 🍊 = 0; 🍊 < 3; 🍊++) {
+            if (🍏[🍇][🍊] == " ") return false;
+        }
+    }
+    return true;
+}
+
+def 🍌(🍋, 🍇, 🍊) {
+    if (🍇 < 0 or 🍇 > 2 or 🍊 < 0 or 🍊 > 2 or 🍏[🍇][🍊] != " ") {
+        return false;
+    }
+    🍏[🍇][🍊] = 🍋;
+    return true;
+}
+
+var 🍊 = "X";
+while (!🍋("X") and !🍋("O") and !🍇()) {
+    🍉();
+    println("Player " + 🍊 + "'s turn.");
+    print("Enter row (0-2): ");
+    var 🍓 = scanNum();
+    print("Enter column (0-2): ");
+    var 🍒 = scanNum();
+    if (🍌(🍊, 🍓, 🍒)) {
+        🍊 = 🍊 == "X" ? "O" : "X";
+    } else {
+        println("Invalid move! Try again.");
+    }
+}
+
+🍉();
+if (🍋("X")) {
+    println("Player X wins!");
+} else if (🍋("O")) {
+    println("Player O wins!");
+} else {
+    println("It's a tie!");
+}
