@@ -569,9 +569,107 @@ public class StandardLibCreator {
             }
         });
 
+        globals.define("_fillRectGraphics", new GCallable() {
+            @Override
+            public int arity() {
+                return 5;
+            }
 
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                Graphics g = (Graphics) arguments.get(0);
 
+                int x1 = (int) ((Double) arguments.get(1)).doubleValue();
+                int y1 = (int) ((Double) arguments.get(2)).doubleValue();
+                int w = (int) ((Double) arguments.get(3)).doubleValue();
+                int h = (int) ((Double) arguments.get(4)).doubleValue();
 
+                g.fillRect(x1, y1, w, h);
+                return null;
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return true;
+            }
+        });
+        globals.define("_fillRoundRectGraphics", new GCallable() {
+            @Override
+            public int arity() {
+                return 7;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                Graphics2D g = (Graphics2D) arguments.get(0);
+
+                int x1 = (int) ((Double) arguments.get(1)).doubleValue();
+                int y1 = (int) ((Double) arguments.get(2)).doubleValue();
+                int w = (int) ((Double) arguments.get(3)).doubleValue();
+                int h = (int) ((Double) arguments.get(4)).doubleValue();
+                int aw = (int) ((Double) arguments.get(5)).doubleValue();
+                int ah = (int) ((Double) arguments.get(6)).doubleValue();
+
+                g.fillRoundRect(x1, y1, w, h, aw, ah);
+                return null;
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return true;
+            }
+        });
+        globals.define("_fillOvalGraphics", new GCallable() {
+            @Override
+            public int arity() {
+                return 5;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                Graphics g = (Graphics) arguments.get(0);
+
+                int x1 = (int) ((Double) arguments.get(1)).doubleValue();
+                int y1 = (int) ((Double) arguments.get(2)).doubleValue();
+                int w = (int) ((Double) arguments.get(3)).doubleValue();
+                int h = (int) ((Double) arguments.get(4)).doubleValue();
+
+                g.fillOval(x1, y1, w, h);
+                return null;
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return true;
+            }
+        });
+
+        globals.define("_fillArcGraphics", new GCallable() {
+            @Override
+            public int arity() {
+                return 7;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                Graphics g = (Graphics) arguments.get(0);
+
+                int x1 = (int) ((Double) arguments.get(1)).doubleValue();
+                int y1 = (int) ((Double) arguments.get(2)).doubleValue();
+                int w = (int) ((Double) arguments.get(3)).doubleValue();
+                int h = (int) ((Double) arguments.get(4)).doubleValue();
+                int angleStart = (int) ((Double) arguments.get(5)).doubleValue();
+                int angleExtent = (int) ((Double) arguments.get(6)).doubleValue();
+
+                g.fillArc(x1, y1, w, h, angleStart, angleExtent);
+                return null;
+            }
+
+            @Override
+            public boolean isWrapped() {
+                return true;
+            }
+        });
 
 
 

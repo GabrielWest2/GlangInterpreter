@@ -126,19 +126,19 @@ class Graphics {
     }
 
     fillRect(x, y, width, height){
-
+        _fillRectGraphics(this.context, x, y, width, height);
     }
 
     fillRoundRect(x, y, width, height, arcw, arch){
-
+        _fillRoundRectGraphics(this.context, x1, y1, width, height);
     }
 
     fillOval(x, y, width, height){
-
+        _fillOvalGraphics(this.context, x, y, width, height);
     }
 
     fillArc(x, y, width, height, startAngle, angularExtent){
-
+        _fillArcGraphics(this.context, x, y, width, height, startAngle, angularExtent);
     }
 }
 
