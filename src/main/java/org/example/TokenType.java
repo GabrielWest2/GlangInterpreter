@@ -2,7 +2,6 @@ package org.example;
 
 /**
  * Represents a token
- * @param
  */
 public enum TokenType {
     EMPTY("^\\s+", "^\\/\\/.*", "^/\\*[\\s\\S]*?\\*\\/"),
@@ -17,6 +16,7 @@ public enum TokenType {
     DOT("^[.]"),
     QUESTION("^[\\?]"),
 
+    MINUS_EQUALS("^[-][=]"),
     PLUS_EQUALS("^[+][=]"),
     PLUS_PLUS("^[+][+]"),
     MINUS_MINUS("^[-][-]"),
@@ -47,6 +47,7 @@ public enum TokenType {
     ELSE("^else(?![_a-zA-Z0-9])"),
     FALSE("^false(?![_a-zA-Z0-9])"),
     DEF("^def(?![_a-zA-Z0-9])"),
+    FOREACH("^foreach(?![_a-zA-Z0-9])"),
     FOR("^for(?![_a-zA-Z0-9])"),
     IF("^if(?![_a-zA-Z0-9])"),
     NULL("^null(?![_a-zA-Z0-9])"),
@@ -59,11 +60,16 @@ public enum TokenType {
     TRUE("^true(?![_a-zA-Z0-9])"),
     VAR("^var(?![_a-zA-Z0-9])"),
     WHILE("^while(?![_a-zA-Z0-9])"),
+    BREAK("^break(?![_a-zA-Z0-9])"),
+    SWITCH("^switch(?![_a-zA-Z0-9])"),
+    CASE("^case(?![_a-zA-Z0-9])"),
+    DEFAULT("^default(?![_a-zA-Z0-9])"),
+
 
     // Literals.
     STRING("^\\\"(\\\\.|[^\\\"\\\\])*\\\""),
     NUMBER("^\\d+\\.?\\d*"),
-    IDENTIFIER("^[_a-zA-Z0-9]{1,31}"),
+    IDENTIFIER("^[_a-zA-Z\\p{So}_]{1,31}[_a-zA-Z0-9\\p{So}_]{0,31}"),
 
     // End of File
     EOF;

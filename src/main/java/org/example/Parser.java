@@ -1,8 +1,6 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Parser {
 
@@ -26,14 +24,9 @@ public class Parser {
     // Statement Rules
 
     private Stmt declaration(){
-        try {
-            if(match(TokenType.VAR)) return varDeclaration();
+        if(match(TokenType.VAR)) return varDeclaration();
 
-            return statement();
-        }catch (ParseError e){
-            synchronize();
-            return null;
-        }
+        return statement();
     }
 
     private Stmt varDeclaration(){
@@ -46,6 +39,7 @@ public class Parser {
         consume(TokenType.SEMICOLON, "Line should be followed by semicolon");
         return new Stmt.Var(var, init);
     }
+
 
     private Stmt statement(){
 
@@ -61,6 +55,9 @@ public class Parser {
         if(match(TokenType.FOR)) {
             return forStatement();
         }
+        if(match(TokenType.FOREACH)) {
+            return forEachStatement();
+        }
         if(match(TokenType.IF)){
             return ifStatement();
         }
@@ -73,8 +70,46 @@ public class Parser {
         if(match(TokenType.RETURN)){
             return returnStatement();
         }
+        if(match(TokenType.BREAK)){
+            return breakStatement();
+        }
+        if(match(TokenType.SWITCH)){
+            return switchStatement();
+        }
         return expressionStatement();
 
+    }
+
+    private Stmt switchStatement() {
+        Token swt = prev();
+        Token lp = consume(TokenType.LEFT_PAREN, "Expect ( after name switch");
+        Expr expr = expression();
+        Token rp = consume(TokenType.RIGHT_PAREN, "Expect ) after name switch expr");
+        consume(TokenType.LEFT_BRACE, "Expect { before body of switch");
+
+        Stmt defaultStmt = null;
+        List<Expr> cases = new ArrayList<>();
+        List<Stmt> caseBodies = new ArrayList<>();
+        while (!match(TokenType.RIGHT_BRACE)){
+            consume(TokenType.CASE, "Expect case declaration");
+            if(match(TokenType.DEFAULT)){
+                defaultStmt = statement();
+            }else{
+                Expr lit = primary();
+                Stmt stmt = statement();
+                cases.add(lit);
+                caseBodies.add(stmt);
+            }
+        }
+
+        return new Stmt.Switch(expr, swt, caseBodies, cases, defaultStmt);
+
+    }
+
+    private Stmt breakStatement() {
+        Token brk = prev();
+        consume(TokenType.SEMICOLON, "Line should be followed by semicolon");
+        return new Stmt.Break(brk);
     }
 
     private Stmt classStatement() {
@@ -110,6 +145,11 @@ public class Parser {
         return new Stmt.Return(rtrn, val);
     }
 
+    /**
+     * Parse function declaration
+     * @param type {@code String} containing either 'function' or 'method'
+     * @return the parsed function stmt
+     */
     private Stmt.Function function(String type){
         Token name = consume(TokenType.IDENTIFIER, "Expected name of " + type);
         Token lp = consume(TokenType.LEFT_PAREN, "Expect ( after name of " + type);
@@ -171,6 +211,20 @@ public class Parser {
         }
 
         return body;
+    }
+
+    private Stmt forEachStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect ( after foreach");
+        consume(TokenType.VAR, "Expect 'var' token");
+        Token var = consume(TokenType.IDENTIFIER, "Expect variable name.");
+        //Stmt var = new Stmt.Var(name, null);
+        Token colon = consume(TokenType.COLON, "Expect : after variable name");
+
+
+        Expr iterable = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ) after foreach");
+        Stmt body = statement();
+        return new Stmt.ForEach(var, iterable, body, colon);
     }
 
     private Stmt whileStatement(){
@@ -238,12 +292,11 @@ public class Parser {
                 return new Expr.Set(get.object, get.name, value);
             } else if(expr instanceof Expr.Postfix){
                 Expr.Postfix postfix = ((Expr.Postfix)expr);
-                if(postfix.operator.getTokenType() == TokenType.LEFT_BRACKET){
-                    System.out.println( "assign arr index");
+                if(postfix.operator.tokenType() == TokenType.LEFT_BRACKET){
                     return new Expr.ArrayAssign(postfix, equals, value);
                 }
             }
-            App.parseError(equals, "Invalid assignment target.");
+            App.parseError(equals, "Invalid assignment target");
         }
 
         return expr;
@@ -251,7 +304,7 @@ public class Parser {
 
     private Expr assignment_add() {
         Expr expr = ternary();
-        if (match(TokenType.PLUS_EQUALS)) {
+        if (match(TokenType.PLUS_EQUALS, TokenType.MINUS_EQUALS)) {
             Token equals = prev();
             Expr value = assignment_add();
             if (expr instanceof Expr.Variable) {
@@ -260,6 +313,11 @@ public class Parser {
             } else if(expr instanceof Expr.Get){
                 Expr.Get get = ((Expr.Get)expr);
                 return new Expr.AdditionSet(get.object, get.name, value);
+            }else if(expr instanceof Expr.Postfix){
+                Expr.Postfix postfix = ((Expr.Postfix)expr);
+                if(postfix.operator.tokenType() == TokenType.LEFT_BRACKET){
+                    return new Expr.AdditionArrayAssign(postfix, equals, value);
+                }
             }
             App.parseError(equals, "Invalid assignment target");
         }
@@ -402,7 +460,7 @@ public class Parser {
         if (match(TokenType.TRUE)) return new Expr.Literal(true);
         if (match(TokenType.NULL)) return new Expr.Literal(null);
         if (match(TokenType.NUMBER, TokenType.STRING)) {
-            return new Expr.Literal(prev().getLiteral());
+            return new Expr.Literal(prev().literal());
         }
         if(match(TokenType.THIS)) return new Expr.This(prev());
         if(match(TokenType.SUPER)){
@@ -430,14 +488,10 @@ public class Parser {
             }
             return new Expr.ArrayInit(exprs);
         }
+
         App.parseError(curr(), "Unexpected token.");
         return null;
     }
-
-
-
-
-
 
 
 
@@ -458,26 +512,9 @@ public class Parser {
         return new Expr.Call(expr, paren, arguments);
     }
 
-    private void synchronize() {
-        advance();
-        while (!isAtEnd()) {
-            if (prev().getTokenType() == TokenType.SEMICOLON) return;
-            switch (peek().getTokenType()) {
-                case CLASS:
-                case DEF:
-                case VAR:
-                case FOR:
-                case IF:
-                case WHILE:
-                case PRINT:
-                case RETURN:
-                    return;
-            }
-            advance();
-        }
-    }
 
 
+    //////////////// Token matching utils
     public boolean match(TokenType... types){
         for(TokenType t : types){
             if(check(t)){
@@ -496,15 +533,13 @@ public class Parser {
         return null;
     }
 
-
-    private Token advance() {
+    private void advance() {
         if (!isAtEnd()) current++;
-        return prev();
     }
 
     private boolean check(TokenType t) {
         if(isAtEnd()) return false;
-        return tokens.get(current).getTokenType() == t;
+        return tokens.get(current).tokenType() == t;
     }
 
     private Token curr(){
@@ -512,7 +547,7 @@ public class Parser {
     }
 
     private boolean isAtEnd() {
-        return peek().getTokenType() == TokenType.EOF;
+        return peek().tokenType() == TokenType.EOF;
     }
 
     private Token peek(){

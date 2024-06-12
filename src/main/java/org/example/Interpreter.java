@@ -6,19 +6,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     private final Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
-
+    public final Map<String, GClass> wrapperClasses = new HashMap<>();
     public Interpreter() {
-        StandardLibCreator.defineStandardLib(globals);
+        StandardLibCreator.defineStandardLib(globals, this);
     }
 
     void interpret(List<Stmt> statements) {
-        try {
-            for (Stmt statement : statements) {
+        for (Stmt statement : statements) {
                 execute(statement);
             }
-        } catch (RuntimeError error) {
-            App.runtimeError(null, error.getMessage());
-        }
     }
 
     private String stringify(Object object) {
@@ -63,7 +59,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         Integer distance = locals.get(expr);
 
         Object oldValue = environment.get(expr.name);
-        Object newValue = plusEq(value, oldValue, expr.name, expr);
+        Object newValue = plusEq(value, oldValue, expr.name);
 
         if (distance != null) {
             environment.assignAt(distance, expr.name, newValue);
@@ -79,11 +75,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         Object value = evaluate(expr.value);
         Expr.Postfix post = (Expr.Postfix)expr.postfix;
 
-        Object index = evaluate(post.val);
-        if(!(index instanceof Double)) App.runtimeError(post.operator, "Expected numeric index");
-        Double ind = (Double) index;
-        if(ind % 1 != 0) App.runtimeError(post.operator, "Expected integer index");
-        int i = (int) (double)ind;
+        int i = getArrayAssignIndex(post);
 
         Object v = evaluate(post.left);
         if(!v.getClass().isArray()) App.runtimeError(post.operator, "Cannot use array access operator on this");
@@ -92,7 +84,51 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
         return arr;
     }
 
-    private Object plusEq(Object value, Object oldValue, Token name, Expr expr) {
+    private int getArrayAssignIndex(Expr.Postfix post) {
+        Object index = evaluate(post.val);
+        if(!(index instanceof Double ind)) {
+            App.runtimeError(post.operator, "Expected numeric index");
+            return -1;
+        }
+
+        if(ind % 1 != 0) App.runtimeError(post.operator, "Expected integer index");
+        return (int) (double)ind;
+    }
+
+    @Override
+    public Object visitAdditionArrayAssignExpr(Expr.AdditionArrayAssign expr) {
+        Object value = evaluate(expr.value);
+        Expr.Postfix post = (Expr.Postfix)expr.postfix;
+
+        int i = getArrayAssignIndex(post);
+
+        Object v = evaluate(post.left);
+        if(!v.getClass().isArray()) App.runtimeError(post.operator, "Cannot use array access operator on this");
+        Object[] arr = (Object[]) v;
+        arr[i] = addOrConcat(arr[i],  value, expr.eq);
+        return arr;
+    }
+
+    private Object addOrConcat(Object o1, Object o2, Token operator) {
+        if (o1 instanceof Double && o2 instanceof Double) {
+            return (double)o1 + (double)o2;
+        }
+        if (o1 instanceof Double && o2 instanceof String) {
+            return stringify(o1) + o2;
+        }
+        // Concat strings
+        if (o1 instanceof String && o2 instanceof String) {
+            return o1 + (String)o2;
+        }
+
+        if (o1 instanceof String && o2 instanceof Double) {
+            return o1 + stringify(o2);
+        }
+        App.runtimeError(operator, "Expected numbers, or strings. Got: " + o1.getClass().getSimpleName() + "  +  " + o2.getClass().getSimpleName());
+        return null;
+    }
+
+    private Object plusEq(Object value, Object oldValue, Token name) {
         Object newValue = null;
 
         if((oldValue instanceof Double || oldValue instanceof String) && (value instanceof Double || value instanceof String)){
@@ -115,59 +151,60 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     public Object visitBinaryExpr(Expr.Binary expr) {
         Object left = evaluate(expr.left);
         Object right = evaluate(expr.right);
-        switch (expr.operator.getTokenType()){
-            case MINUS:
+        return switch (expr.operator.tokenType()) {
+            case MINUS -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left - (double)right;
-            case SLASH:
+                yield (double) left - (double) right;
+            }
+            case SLASH -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left / (double)right;
-            case PERCENT:
+                yield (double) left / (double) right;
+            }
+            case PERCENT -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left % (double)right;
-            case STAR:
+                yield (double) left % (double) right;
+            }
+            case STAR -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left * (double)right;
-            case PLUS:
+                yield (double) left * (double) right;
+            }
+            case PLUS ->
                 // Add numbers
-                if (left instanceof Double && right instanceof Double) {
-                    return (double)left + (double)right;
-                }
-                if (left instanceof Double && right instanceof String) {
-                    return stringify(left) + right;
-                }
-                // Concat strings
-                if (left instanceof String && right instanceof String) {
-                    return left + (String)right;
-                }
-
-                if (left instanceof String && right instanceof Double) {
-                    return left + stringify(right);
-                }
-                App.runtimeError(expr.operator, "Expected numbers, or strings.");
-            case GREATER:
+                    addOrConcat(left, right, expr.operator);
+            case GREATER -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left > (double)right;
-            case GREATER_EQUAL:
+                yield (double) left > (double) right;
+            }
+            case GREATER_EQUAL -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left >= (double)right;
-            case LESS:
+                yield (double) left >= (double) right;
+            }
+            case LESS -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left < (double)right;
-            case LESS_EQUAL:
+                yield (double) left < (double) right;
+            }
+            case LESS_EQUAL -> {
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left <= (double)right;
-            case BANG_EQUAL: return !isEqual(left, right);
-            case EQUAL_EQUAL: return isEqual(left, right);
-        }
-        return null;
+                yield (double) left <= (double) right;
+            }
+            case BANG_EQUAL -> !isEqual(left, right);
+            case EQUAL_EQUAL -> isEqual(left, right);
+            default -> null;
+        };
     }
 
     @Override
     public Object visitGetExpr(Expr.Get expr) {
         Object obj = evaluate(expr.object);
-        if(obj == null) App.runtimeError(expr.name, "Null ptrs do not have properties");
-        if(!(obj instanceof GClassInstance)) App.runtimeError(expr.name, "Only objects have properties");
+        if(obj == null){
+            App.runtimeError(expr.name, "Null ptrs do not have properties");
+            return null;
+        }
+        if(!(obj instanceof GClassInstance)){
+            App.runtimeError(expr.name, "Only objects have properties");
+            return null;
+        }
+
 
         return ((GClassInstance)obj).get(expr.name);
     }
@@ -175,7 +212,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitSetExpr(Expr.Set expr) {
         Object obj = evaluate(expr.object);
-        if(!(obj instanceof GClassInstance)) App.runtimeError(expr.name, "Only objects have fields");
+        if(!(obj instanceof GClassInstance)){
+            App.runtimeError(expr.name, "Only objects have fields");
+            return null;
+        }
 
         Object val = evaluate(expr.value);
         ((GClassInstance)obj).set(expr.name, val);
@@ -185,13 +225,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitAdditionSetExpr(Expr.AdditionSet expr) {
         Object obj = evaluate(expr.object);
-        if(!(obj instanceof GClassInstance)) App.runtimeError(expr.name, "Only objects have fields");
+        if(!(obj instanceof GClassInstance)){
+            App.runtimeError(expr.name, "Only objects have fields");
+            return null;
+        }
 
         Object value = evaluate(expr.value);
 
-        System.out.println("rb");
         Object oldValue = ((GClassInstance)obj).get(expr.name);
-        Object newValue = plusEq(value, oldValue, expr.name, expr);
+        Object newValue = plusEq(value, oldValue, expr.name);
 
 
         ((GClassInstance)obj).set(expr.name, newValue);
@@ -201,21 +243,24 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitCallExpr(Expr.Call expr) {
         Object callee = evaluate(expr.callee);
-
         List<Object> arguments = new ArrayList<>();
         for(Expr arg : expr.arguments){
             arguments.add(evaluate(arg));
         }
 
-        if(!(callee instanceof GCallable)){
+        if(!(callee instanceof GCallable function)){
+            App.runtimeError(expr.paren, "Cannot call this.");
+            return null;
+        }
+
+        if(function.isWrapped() && environment.isDeclaredHere("__END_WRAPPER_DECL__")){
             App.runtimeError(expr.paren, "Cannot call this.");
         }
 
-        GCallable function = (GCallable) callee;
         if (arguments.size() != function.arity()) {
             App.runtimeError(expr.paren, "Expected " +
                     function.arity() + " argument" + (function.arity() > 1 ? "s" : "") + " but got " +
-                    (arguments.size() == 0 ? "none" : arguments.size()) + ".");
+                    (arguments.isEmpty() ? "none" : arguments.size()) + ".");
            return null;
         }
         return function.call(this, arguments);
@@ -264,7 +309,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitLogicalExpr(Expr.Logical expr) {
         Object left = evaluate(expr.left);
-        switch (expr.operator.getTokenType()){
+        switch (expr.operator.tokenType()){
             case OR -> {
                 if (isTruthy(left)) return left;
                 return evaluate(expr.right);
@@ -287,7 +332,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
         Object value = evaluate(expr.right);
-        switch (expr.operator.getTokenType()) {
+        switch (expr.operator.tokenType()) {
             case MINUS -> {
                 checkNumberOperand(expr.operator, value);
                 return -(double) value;
@@ -303,7 +348,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
                 Object var = lookUpVariable(varexpr.name, varexpr);
                 checkNumberOperand(expr.operator, value);
 
-                value = ((double)value) + (expr.operator.getTokenType() == TokenType.PLUS_PLUS ? 1 : -1);
+                value = ((double)value) + (expr.operator.tokenType() == TokenType.PLUS_PLUS ? 1 : -1);
 
                 Integer distance = locals.get(varexpr);
                 if (distance != null) {
@@ -331,7 +376,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     @Override
     public Object visitPostfixExpr(Expr.Postfix expr) {
         Object value = evaluate(expr.left);
-        if(expr.operator.getTokenType() != TokenType.LEFT_BRACKET) {
+        if(expr.operator.tokenType() != TokenType.LEFT_BRACKET) {
             if (!(expr.left instanceof Expr.Variable)) {
                 App.runtimeError(expr.operator, "Expected name of variable");
                 return null;
@@ -340,7 +385,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             Object var = lookUpVariable(varexpr.name, varexpr);
             checkNumberOperand(expr.operator, value);
 
-            Object newvalue = ((double) value) + (expr.operator.getTokenType() == TokenType.PLUS_PLUS ? 1 : -1);
+            Object newvalue = ((double) value) + (expr.operator.tokenType() == TokenType.PLUS_PLUS ? 1 : -1);
 
             Integer distance = locals.get(varexpr);
             if (distance != null) {
@@ -353,11 +398,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
         if(!value.getClass().isArray()) App.runtimeError(expr.operator, "Cannot use array access operator on this");
 
-        Object index = evaluate(expr.val);
-        if(!(index instanceof Double)) App.runtimeError(expr.operator, "Expected numeric index");
-        Double ind = (Double) index;
-        if(ind % 1 != 0) App.runtimeError(expr.operator, "Expected integer index");
-        int i = (int) (double)ind;
+        int i = getArrayAssignIndex(expr);
 
         return ((Object[]) value)[i];
     }
@@ -379,10 +420,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
         GClassInstance object = (GClassInstance)environment.getAt("this", distance - 1);
 
-        GFunction method = base.findMethod(expr.method.getLexeme());
+        GFunction method = base.findMethod(expr.method.lexeme());
 
         if(method == null){
-            App.runtimeError(expr.method, "Undefined property " + expr.method.getLexeme());
+            App.runtimeError(expr.method, "Undefined property " + expr.method.lexeme());
         }
 
 
@@ -393,7 +434,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     private Object lookUpVariable(Token name, Expr expr) {
         Integer distance = locals.get(expr);
         if (distance != null) {
-            return environment.getAt(name.getLexeme(), distance);
+            return environment.getAt(name.lexeme(), distance);
         } else {
             return globals.get(name);
         }
@@ -441,8 +482,8 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        GFunction func = new GFunction(stmt, environment, false);
-        environment.define(stmt.name.getLexeme(), func);
+        GFunction func = new GFunction(stmt, environment, false, false);
+        environment.define(stmt.name.lexeme(), func);
         return null;
     }
 
@@ -458,16 +499,81 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        while(isTruthy(evaluate(stmt.condition))){
-            execute(stmt.body);
+        try {
+            while(isTruthy(evaluate(stmt.condition))){
+                execute(stmt.body);
+            }
+        }catch (BreakFrom ignored){
+
         }
+
+        return null;
+    }
+
+    @Override
+    public Void visitForEachStmt(Stmt.ForEach stmt) {
+
+        Object iterable = evaluate(stmt.iterable);
+        List<Object> items = new ArrayList<>();
+
+        GClass wrappedList = wrapperClasses.get("List");
+        GClass wrappedMap = wrapperClasses.get("Dict");
+        GClass wrappedPair = wrapperClasses.get("Pair");
+
+        // Check to make sure that iterable is actually iterable
+        if((!iterable.getClass().isArray())
+                && (!(iterable instanceof List))
+                && (!(iterable instanceof GClassInstance))
+                && (!(iterable instanceof Map))){
+            App.runtimeError(stmt.colon, "Expected iterable object here");
+        }
+
+
+        if(iterable.getClass().isArray()){
+            items.addAll(List.of((Object[]) iterable));
+        }else if(iterable instanceof List<?> iterableList){
+            items.addAll(iterableList);
+        }else if(iterable instanceof GClassInstance iterableClassInstance){
+            if(iterableClassInstance.getGClass().equals(wrappedList)){
+                Object arrObj = iterableClassInstance.getField("arr");
+                if(arrObj instanceof List<?> vals) {
+                    items.addAll(vals);
+                }
+            }else if(iterableClassInstance.getGClass().equals(wrappedMap)){
+                if(iterableClassInstance.getField("map") instanceof Map<?,?> vals) {
+                    for (Map.Entry<?, ?> entry : vals.entrySet()) {
+                        GClassInstance pair = (GClassInstance) wrappedPair.call(this, List.of(entry.getKey(), entry.getValue()));
+                        items.add(pair);
+                    }
+                }
+            }else{
+                App.runtimeError(stmt.colon, "Expected iterable object here");
+            }
+        }
+
+
+        try {
+        //Environment parent = environment;
+        //environment = new Environment(parent);
+
+
+
+            for (Object o : items) {
+
+                environment.define(stmt.var.lexeme(), o);
+                execute(stmt.body);
+            }
+            //environment = parent;
+        }catch (BreakFrom ignored){}
+
+
         return null;
     }
 
     @Override
     public Void visitPrintStmt(Stmt.Print stmt) {
         Object value = evaluate(stmt.expression);
-        System.out.println(stringify(value));
+        System.out.print(stringify(value));
         return null;
     }
 
@@ -479,13 +585,14 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             value = evaluate(stmt.initializer);
         }
 
-        environment.define(stmt.name.getLexeme(), value);
+        environment.define(stmt.name.lexeme(), value);
         return null;
     }
 
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
         Object value = null;
+
         if(stmt.value != null) {
             value = evaluate(stmt.value);
         }
@@ -493,8 +600,33 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
     }
 
     @Override
+    public Void visitSwitchStmt(Stmt.Switch stmt) {
+        Object switching = evaluate(stmt.expression);
+        boolean hasMatched = false;
+        try {
+            for (int i = 0; i < stmt.caseValues.size(); i++) {
+                Object o = evaluate(stmt.caseValues.get(i));
+                if (o.equals(switching)) {
+                    execute(stmt.caseBodies.get(i));
+                    hasMatched = true;
+                }
+            }
+
+            if (stmt.defaultCase != null && !hasMatched) {
+                execute(stmt.defaultCase);
+            }
+        } catch (BreakFrom ignored) {}
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        throw new BreakFrom();
+    }
+
+    @Override
     public Void visitClassStmt(Stmt.Class stmt) {
-        Object base = null;
+        Object base;
         GClass baseclass = null;
         if (stmt.base != null) {
             base = evaluate(stmt.base);
@@ -505,7 +637,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             }
         }
 
-        environment.define(stmt.name.getLexeme(), null);
+        environment.define(stmt.name.lexeme(), null);
 
         if(stmt.base != null){
             environment = new Environment(environment);
@@ -514,22 +646,21 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
 
         HashMap<String, GFunction> methods = new HashMap<>();
         for(Stmt.Function method : stmt.methods){
-            GFunction func = new GFunction(method, environment, method.name.getLexeme().equals("constructor"));
-            methods.put(method.name.getLexeme(), func);
+            GFunction func = new GFunction(method, environment, method.name.lexeme().equals("constructor"), false);
+            methods.put(method.name.lexeme(), func);
         }
 
 
-        GClass clazz = new GClass(stmt.name.getLexeme(), methods, baseclass);
-
+        GClass clazz = new GClass(stmt.name.lexeme(), methods, baseclass);
+        if(!environment.isDeclaredHere("__END_WRAPPER_DECL__")){
+            wrapperClasses.put(clazz.name(), clazz);
+        }
         if(stmt.base != null){
             environment = environment.getParent();
         }
         environment.assign(stmt.name, clazz);
 
         return null;
-    }
-    public Environment getGlobals() {
-        return globals;
     }
 
     public void resolve(Expr expr, int i) {

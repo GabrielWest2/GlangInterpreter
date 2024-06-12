@@ -1,13 +1,67 @@
-var arrs = [[1, 2], [1, 2, 3, 4], [3], [1, 2, 3]];
+// Create a new 400x400 canvas with the title "Fun"
+var canvas = Canvas("Fun", 400, 400);
+canvas.show();
 
-arrs[3][0] = 100;
+def paint(g) {
+    // Set the font to Bold Arial 15
+    g.setFont("Arial", BOLD, 15);
+    // Set the color to red
+    g.setColor(Color(255, 0, 0));
+    // Draw an oval at the center of the canvas
+    g.drawOval(150, 150, 100, 100);
+    // Draw a string in the center
+    g.drawString("Cool!", 170, 200);
 
-for(var v = 0; v < len(arrs); v++){
-    var g = arrs[v];
-    for(var i = 0; i < len(g); i++){
-        var h = g[i];
-        print "Arr " + v + ":  " + h;
+    // Draw and fill multiple colorful lines from the center to the canvas edges
+    var centerX = 200;
+    var centerY = 200;
+    for (var i = 0; i < 360; i += 15) {
+        var angle = toRad(i);
+        var x = centerX + (150 * cos(angle));
+        var y = centerY + (150 * sin(angle));
+        // Set a random color for each line
+        g.setColor(Color(random() * 255, random() * 255, random() * 255));
+        g.drawLine(centerX, centerY, x, y);
     }
-    print "";
+
+    // Draw and fill colorful rectangles in a grid pattern
+    for (var x = 0; x < 400; x += 50) {
+        for (var y = 0; y < 400; y += 50) {
+            // Set a random color for each rectangle
+            var color = Color(random() * 255, random() * 255, random() * 255);
+            g.setColor(color);
+            g.fillRect(x, y, 50, 50);
+            g.setColor(Color(0, 0, 0));
+            g.drawRect(x, y, 50, 50);
+        }
+    }
+
+    // Draw and fill arcs in a circular pattern
+    for (var i = 0; i < 360; i += 30) {
+        var angle = toRad(i);
+        var x = centerX + (100 * cos(angle));
+        var y = centerY + (100 * sin(angle));
+        // Set a random color for each arc
+        var color = Color(random() * 255, random() * 255, random() * 255);
+        g.setColor(color);
+        g.fillArc(x - 25, y - 25, 50, 50, 0, 270);
+        g.setColor(Color(0, 0, 0));
+        g.drawArc(x - 25, y - 25, 50, 50, 0, 270);
+    }
+
+    // Draw and fill ovals in random positions
+    for (var i = 0; i < 10; i++) {
+        var x = random() * 350;
+        var y = random() * 350;
+        var width = random() * 50 + 10;
+        var height = random() * 50 + 10;
+        // Set a random color for each oval
+        var color = Color(random() * 255, random() * 255, random() * 255);
+        g.setColor(color);
+        g.fillOval(x, y, width, height);
+        g.setColor(Color(0, 0, 0));
+        g.drawOval(x, y, width, height);
+    }
 }
 
+canvas.setPaintCallback(paint);

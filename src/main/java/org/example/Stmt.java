@@ -9,9 +9,12 @@ public abstract class Stmt {
  R visitFunctionStmt(Function stmt);
  R visitIfStmt(If stmt);
  R visitWhileStmt(While stmt);
+ R visitForEachStmt(ForEach stmt);
  R visitPrintStmt(Print stmt);
  R visitVarStmt(Var stmt);
  R visitReturnStmt(Return stmt);
+ R visitSwitchStmt(Switch stmt);
+ R visitBreakStmt(Break stmt);
  R visitClassStmt(Class stmt);
  }
  public static class Block extends Stmt {
@@ -84,6 +87,24 @@ public final Stmt body;
  return visitor.visitWhileStmt(this);
  }
  }
+ public static class ForEach extends Stmt {
+ ForEach(Token var, Expr iterable, Stmt body, Token colon) {
+ this.var = var;
+ this.iterable = iterable;
+ this.body = body;
+ this.colon = colon;
+ }
+
+public final Token var;
+public final Expr iterable;
+public final Stmt body;
+public final Token colon;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitForEachStmt(this);
+ }
+ }
  public static class Print extends Stmt {
  Print(Expr expression) {
  this.expression = expression;
@@ -122,6 +143,39 @@ public final Expr value;
  @Override
  public <R> R accept(Visitor<R> visitor) {
  return visitor.visitReturnStmt(this);
+ }
+ }
+
+ public static class Switch extends Stmt {
+ Switch(Expr expression, Token keyword, List<Stmt> caseBodies, List<Expr> caseValues, Stmt defaultCase) {
+ this.expression = expression;
+ this.keyword = keyword;
+ this.caseBodies = caseBodies;
+ this.caseValues = caseValues;
+ this.defaultCase = defaultCase;
+ }
+
+public final Expr expression;
+public final Token keyword;
+public final List<Stmt> caseBodies;
+public final List<Expr> caseValues;
+public final Stmt defaultCase;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitSwitchStmt(this);
+ }
+ }
+ public static class Break extends Stmt {
+ Break(Token keyword) {
+ this.keyword = keyword;
+ }
+
+public final Token keyword;
+
+ @Override
+ public <R> R accept(Visitor<R> visitor) {
+ return visitor.visitBreakStmt(this);
  }
  }
  public static class Class extends Stmt {

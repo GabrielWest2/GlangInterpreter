@@ -1,5 +1,7 @@
 package org.example.tools;
 
+// FROM CRAFTING INTERPRETERS
+
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -13,6 +15,7 @@ public class ASTGenerator {
                 "Assign : Token name, Expr value",
                 "AdditionAssign : Token name, Expr value",
                 "ArrayAssign : Expr postfix, Token eq, Expr value",
+                "AdditionArrayAssign : Expr postfix, Token eq, Expr value",
                 "Binary : Expr left, Token operator, Expr right",
                 "Get : Expr object, Token name",
                 "Set : Expr object, Token name, Expr value",
@@ -35,9 +38,12 @@ public class ASTGenerator {
                 "Function : Token name, List<Token> params, List<Stmt> body",
                 "If : Expr condition, Stmt thenBranch, Stmt elseBranch",
                 "While : Expr condition, Stmt body",
+                "ForEach : Token var, Expr iterable, Stmt body, Token colon",
                 "Print : Expr expression",
                 "Var : Token name, Expr initializer",
                 "Return : Token keyword, Expr value",
+                "Switch : Expr expression, Token keyword, List<Stmt> caseBodies, List<Expr> caseValues, Stmt defaultCase",
+                "Break : Token keyword",
                 "Class : Token name, List<Stmt.Function> methods, Expr.Variable base"
         ));
     }

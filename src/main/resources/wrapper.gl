@@ -1,0 +1,232 @@
+class List {
+    constructor() {
+        this.arr = _createArrayList();
+    }
+
+    get(index){
+        return _getArrayListItem(this.arr, index);
+    }
+
+    add(item){
+        _addArrayListItem(this.arr, item);
+        return this;
+    }
+
+    set(index, item){
+        _setArrayListItem(this.arr, index, item);
+        return this;
+    }
+
+    set(index, item){
+        _setArrayListItem(this.arr, index, item);
+        return this;
+    }
+
+    length(){
+        return _getArrayListLength(this.arr);
+    }
+
+    toString(){
+        var s = "[";
+        var len = this.length();
+        for(var v = 0; v < len; v += 1){
+            s += this.get(v);
+            if(v < len - 1){
+                s += ", ";
+            }
+        }
+        s += "]";
+        return s;
+    }
+}
+
+var FACTOR = 0.7;
+class Color {
+    constructor(r, g, b){
+        this.a = 255;
+        this.r = r;
+        this.g = b;
+        this.b = b;
+    }
+
+    brighter(){
+        var r = this.r;
+        var g = this.g;
+        var b = this.b;
+        var a = this.a;
+
+        var i = (1.0 / (1.0 - FACTOR));
+
+        if ( r == 0 and g == 0 and b == 0) {
+            return Color(i, i, i);
+        }
+
+        if ( r > 0 and r < i ) r = i;
+        if ( g > 0 and g < i ) g = i;
+        if ( b > 0 and b < i ) b = i;
+
+        return Color(
+            min((r/FACTOR), 255.0),
+            min((g/FACTOR), 255.0),
+            min((b/FACTOR), 255.0)
+        );
+    }
+
+    darker(){
+        return Color(max((this.r  * FACTOR), 0),
+                     max((this.g * FACTOR), 0),
+                     max((this.b * FACTOR), 0)
+        );
+    }
+
+    toString() {
+        return "[r=" + this.r + ",g=" + this.g + ",b=" + this.b + "]";
+    }
+}
+
+var PLAIN = 0;
+var BOLD = 1;
+var ITALIC = 2;
+
+class Graphics {
+    constructor(nativeCtx){
+        this.context = nativeCtx;
+    }
+
+    setColor(c){
+        _setGraphicsColor(this.context, c);
+    }
+
+    setFont(name, weight, size){
+        _setGraphicsFont(this.context, name, weight, size);
+    }
+
+    drawLine(x1, y1, x2, y2){
+        _drawLineGraphics(this.context, x1, y1, x2, y2);
+    }
+
+    drawRect(x1, y1, width, height){
+        _drawRectGraphics(this.context, x1, y1, width, height);
+    }
+
+    drawRoundRect(x1, y1, width, height, arcw, arch){
+        _drawRoundRectGraphics(this.context, x1, y1, width, height, arcw, arch);
+    }
+
+    drawOval(x, y, width, height){
+        _drawOvalGraphics(this.context, x, y, width, height);
+    }
+
+    drawArc(x, y, width, height, startAngle, angularExtent){
+        _drawArcGraphics(this.context, x, y, width, height, startAngle, angularExtent);
+    }
+
+    drawString(str, x, y){
+        _drawStringGraphics(this.context, str, x, y);
+    }
+
+    fillRect(x, y, width, height){
+        _fillRectGraphics(this.context, x, y, width, height);
+    }
+
+    fillRoundRect(x, y, width, height, arcw, arch){
+        _fillRoundRectGraphics(this.context, x1, y1, width, height);
+    }
+
+    fillOval(x, y, width, height){
+        _fillOvalGraphics(this.context, x, y, width, height);
+    }
+
+    fillArc(x, y, width, height, startAngle, angularExtent){
+        _fillArcGraphics(this.context, x, y, width, height, startAngle, angularExtent);
+    }
+}
+
+
+class Canvas {
+    constructor(title, width, height){
+        this.canvas = _canvasCreate(title, width, height);
+        println("constructed canvas");
+        println(this.canvas == null ? "was null" : "was NOT null");
+    }
+
+    show(){
+        _canvasSetVisible(this.canvas, true);
+    }
+
+    hide(){
+        _canvasSetVisible(this.canvas, false);
+    }
+
+    setPaintCallback(paintFunc){
+        _canvasSetCallback(this.canvas, paintFunc);
+    }
+
+    dispose(){
+        _canvasDispose(this.canvas);
+    }
+}
+
+
+
+
+
+class Pair {
+    constructor(k, v){
+        this.k = k;
+        this.v = v;
+    }
+
+    toString(){
+        return this.k + "=" + this.v;
+    }
+}
+
+class Dict {
+    constructor() {
+        this.map = _createHashMap();
+    }
+
+    put(k, v) {
+        _putHashMap(this.map, k, v);
+        return this;
+    }
+
+    get(k) {
+        return _getHashMap(this.map, k);
+    }
+
+    containsKey(k){
+        return _containsHashMapKey(this.map, k);
+    }
+
+    containsValue(v){
+        return _containsHashMapValue(this.map, v);
+    }
+
+    remove(k){
+        return _removeHashMapValue(this.map, k);
+    }
+
+    getKeys(){
+        return _getKeysHashmap(this.map);
+    }
+
+    getValues(){
+        return _getValuesHashmap(this.map);
+    }
+
+    getPairs(){
+        return _getPairsHashmap(this.map);
+    }
+
+    toString(){
+        var s = "[ ";
+        foreach(var pair : this){
+            s += pair.toString() + " ";
+        }
+
+        return s + "]";
+    }
+}
+var __END_WRAPPER_DECL__;

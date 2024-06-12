@@ -7,11 +7,8 @@ package org.example;
  * statements
  * @see Stmt
  */
-public class ReturnValue extends RuntimeException{
-    final Object value;
-
-    public ReturnValue(Object v){
+public class BreakFrom extends RuntimeException{
+    public BreakFrom(){
         super(null, null, false, false);
-        this.value = v;
     }
 }
