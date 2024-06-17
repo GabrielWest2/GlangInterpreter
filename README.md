@@ -1,6 +1,6 @@
 # Glang Interpreter
 
-Glang is a custom programming language designed for fun and learning. This repository contains an interpreter for Glang and several example programs to demonstrate its capabilities.
+Glang is a custom programming language designed for fun and learning. This repository contains an interpreter for Glang and a few example programs to demonstrate its capabilities.
 
 ## Getting Started
 
@@ -140,3 +140,7 @@ var myDog = Dog("Buddy");
 myDog.speak();
 myDog.sleep();
 ```
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
