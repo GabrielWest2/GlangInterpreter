@@ -17,7 +17,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void>{
             }
     }
 
-    private String stringify(Object object) {
+    String stringify(Object object) {
         if (object == null) return "null";
         if(object.getClass().isArray()){
             Object[] arrayValues = (Object[])object;
