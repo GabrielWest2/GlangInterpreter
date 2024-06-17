@@ -1,4 +1,4 @@
-package org.example;
+package com.gabe;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
  * @see GFunction
  */
 public record GClass(String name, HashMap<String, GFunction> methods,
-                     org.example.GClass baseclass) implements GCallable {
+                     GClass baseclass) implements GCallable {
 
     @Override
     public String toString() {

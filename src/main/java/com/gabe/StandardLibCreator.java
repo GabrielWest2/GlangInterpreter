@@ -1,4 +1,4 @@
-package org.example;
+package com.gabe;
 
 import javax.swing.*;
 import java.awt.*;

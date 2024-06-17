@@ -1,4 +1,4 @@
-package org.example;
+package com.gabe;
 
 /**
  * Allows a return value to be sent down the stack,
@@ -7,8 +7,11 @@ package org.example;
  * statements
  * @see Stmt
  */
-public class BreakFrom extends RuntimeException{
-    public BreakFrom(){
+public class ReturnValue extends RuntimeException{
+    final Object value;
+
+    public ReturnValue(Object v){
         super(null, null, false, false);
+        this.value = v;
     }
 }

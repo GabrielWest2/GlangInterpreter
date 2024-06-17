@@ -1,4 +1,4 @@
-package org.example;
+package com.gabe;
 
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 import me.xdrop.fuzzywuzzy.model.ExtractedResult;
